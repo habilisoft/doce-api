@@ -1,0 +1,23 @@
+databaseChangeLog:
+- include:
+    file: classpath:/migrations/tenant/set-schema.sql
+- include:
+    file: classpath:/migrations/tenant/create-initial-tables.sql
+- include:
+    file: classpath:/migrations/tenant/add-users-columns.sql
+- include:
+    file: classpath:/migrations/tenant/1-add-document-number-to-employee.sql
+- include:
+    file: classpath:/migrations/tenant/2-create-sequences.sql
+- include:
+    file: classpath:/migrations/tenant/3-rename-department-table-to-group.sql
+- include:
+    file: classpath:/migrations/tenant/4-rename-department-column-to-group.sql
+- include:
+    file: classpath:/migrations/tenant/5-change-employee-name-column.sql
+- include:
+    file: classpath:/migrations/tenant/6-add-late-grace-period-column.sql
+- include:
+    file: classpath:/migrations/tenant/7-add-details-column-to-workshift-table.sql
+- include:
+    file: classpath:/migrations/tenant/8-add-punch-for-break-to-workshift-table.sql

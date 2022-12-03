@@ -1,0 +1,52 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+change-log:
+  tenant: classpath:/db/changelog/db.changelog-tenant.yaml
+tenant-statement: SET search_path TO %s ;
+spring:
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      javax:
+        persistence:
+          validation:
+            mode: none
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    show-sql: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+  main:
+    allow-bean-definition-overriding: true
+cloud:
+  aws:
+    stack:
+      auto: false
+    region:
+      static: us-east-1
+    credentials:
+      accessKey: AKIA3U2JKO4T27DYS7ET
+      secretKey: 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
+    sqs:
+      api-queue: doce-api-local
+      device-queue: doce-device-local
+
+jwt:
+  secret: Ws_rh+h*p)4=SzFC
+token-encryption:
+  secret: jm1VmFuwNYtwZFCsCpiKpHIzgZPRrmz7
+  salt: CJQyX08Q6W
+application:
+  oauthPassword: Ws_rh+h*p)4=SzFC
+  oauthPassword2: ~kF3gs.BP2-Cwfw28_yS-xmB6C~4wU-Cmf

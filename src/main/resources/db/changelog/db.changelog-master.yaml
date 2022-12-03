@@ -1,0 +1,7 @@
+databaseChangeLog:
+- include:
+    file: classpath:/migrations/public/v_001-changelog.sql
+- include:
+      file: classpath:/migrations/public/add-users-columns.sql
+- include:
+    file: classpath:/migrations/public/1-create-sequences.sql
