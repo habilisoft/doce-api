@@ -54,7 +54,8 @@ public class WebSecurityConfig {
                         "/logout",
                         "/healthcheck",
                         "/recover-password",
-                        "/recover-password/**"
+                        "/recover-password/**",
+                        "/users/default-user"
                 ).permitAll()
                 .anyRequest()
                 .authenticated()
