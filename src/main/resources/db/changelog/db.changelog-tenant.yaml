@@ -21,3 +21,5 @@ databaseChangeLog:
     file: classpath:/migrations/tenant/7-add-details-column-to-workshift-table.sql
 - include:
     file: classpath:/migrations/tenant/8-add-punch-for-break-to-workshift-table.sql
+- include:
+    file: classpath:/migrations/tenant/9-add-scheduled-reports.sql

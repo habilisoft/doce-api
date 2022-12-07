@@ -32,3 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 logs
+liquibase-diff-changeLog.postgresql.sql
