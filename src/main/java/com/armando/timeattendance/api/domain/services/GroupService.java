@@ -19,7 +19,7 @@ public class GroupService {
     public Group createGroup(CreateGroup request) {
         return groupRepository.save(
                 Group.builder()
-                        .name(request.name())
+                        .name(request.getName())
                         .build()
         );
     }

@@ -1,0 +1,911 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Doce Stack
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: Cluster
+        Parameters:
+          - ClusterName
+      -
+        Label:
+          default: Environment
+        Parameters:
+          - ActiveProfile
+      -
+        Label:
+          default: Datasource parameters
+        Parameters:
+          - DatabaseName
+          - DatabaseInstanceName
+          - DatasourceUser
+          - DatasourcePassword
+          - DBInstanceType
+          - DatabaseRetentionPeriod
+          - DataBaseStorage
+      -
+        Label:
+          default: Repository and App names and tag
+        Parameters:
+            - RepositoryName
+            - ApiName
+            - UIName
+            - DockerImageTag
+      -
+        Label:
+          default: Instance
+        Parameters:
+            - InstanceImageId
+            - InstanceKeyPair
+            - InstanceType
+      -
+        Label:
+          default: Route53 Settings
+        Parameters:
+            - HostedZoneId
+            - DomainName
+            - CertificateArn
+Parameters:
+  ClusterName:
+    Type: String
+    Description: Name of the cluster
+    Default: Doce
+  BucketName:
+    Type: String
+    Description: Name of the s3 bucket (no dots)
+    Default: doce-files
+  ActiveProfile:
+    Type: String
+    Description: Active profile properties (dev, qa prod)
+    Default: prod
+  RepositoryName:
+    Type: String
+    Description: Name of the docker repository
+    Default: 502154089745.dkr.ecr.us-east-1.amazonaws.com/doce/
+  ApiName:
+    Type: String
+    Description: Name of the api service
+    Default: api
+  UIName:
+    Type: String
+    Description: Name of the ui service
+    Default: web-ui
+  DeviceServiceName:
+    Type: String
+    Description: Name of the device service
+    Default: device-service
+  DockerImageTag:
+    Type: String
+    Description: "Tag of of the repository image to be used Ex: dev, qa, prod, v1.0.0"
+    Default: latest
+  CertificateArn:
+    Type: String
+    Description: Arn of the certificate for https
+    Default: arn:aws:acm:us-east-1:502154089745:certificate/8dd14848-3605-4eb9-a808-944e3e91ed11
+  InstanceImageId:
+    Type: String
+    Description: EC2 Instance Image ID
+    Default: ami-07da26e39622a03dc
+  InstanceKeyPair:
+    Type: String
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the cluster instances
+    MinLength: 1
+    MaxLength: 255
+    Default: Habilisoft
+  InstanceType:
+    Type: String
+    Description: Cluster instance Type
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - t2.xlarge
+      - t2.2xlarge
+  DBInstanceType:
+    Type: String
+    Description: Database Instace Class database
+    Default: db.t2.micro
+    AllowedValues:
+      - db.t2.micro
+      - db.t2.small
+      - db.t2.medium
+      - db.m3.medium
+      - db.m3.large
+      - db.m3.xlarge
+      - db.m3.2xlarge
+  DatasourceUser:
+    Type: String
+    Description: Datasource user
+    Default: master_user
+  DatasourcePassword:
+    Type: String
+    Description: Datasource Password
+    Default: 3k1ypt1K
+  DatabaseRetentionPeriod:
+    Type: Number
+    Default: 1
+    Description: Database backup rentention period
+    MinValue: 0
+    MaxValue: 35
+  DataBaseStorage:
+    Type: Number
+    Default: 20
+    MinValue: 20
+    MaxValue: 16384
+    Description: Database Storage Size (GB)
+  DatabaseName:
+    Type: String
+    Description: Name of the database
+    Default: doce
+  DatabaseInstanceName:
+    Type: String
+    Description: Name of the Instance
+    Default: doce-db
+  MultiAZDeplyment:
+    Type: String
+    Description: Multi AZ Deplyment (For production)
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  HostedZoneId:
+    Type: String
+    Description: Id of the Hosted Zone
+    Default: Z01275702M4FNR9BR9G8N
+  DomainName:
+    Type: String
+    Description: Name of the record set to loadbalancer dns name will be attach
+    Default: app.doce.do
+Conditions:
+  createMultiZone: !Equals [!Ref MultiAZDeplyment, true]
+Resources:
+  cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref ClusterName
+  s3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+  ecsInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join
+        - ''
+        - - !Ref ClusterName
+          - '-ecsInstanceRole'
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+      Policies:
+        - PolicyName: !Join
+            - '-'
+            - - !Ref ClusterName
+              - 's3-policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                  - 's3:GetObject'
+                  - 's3:DeleteObject'
+                  - 's3:PutObjectAcl'
+                Resource: !Join
+                  - ''
+                  - - 'arn:aws:s3:::'
+                    - !Ref s3Bucket
+                    - '/*'
+        - PolicyName: !Join
+            - '-'
+            - - !Ref ClusterName
+              - 'sqs-policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'sqs:*'
+                Resource:
+                  - !GetAtt apiQueue.Arn
+                  - !GetAtt deviceQueue.Arn
+        - PolicyName: !Join
+            - '-'
+            - - !Ref ClusterName
+              - 'ses-policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ses:SendBounce'
+                  - 'ses:SendCustomVerificationEmail'
+                  - 'ses:SendEmail'
+                  - 'ses:SendCustomVerificationEmail'
+                  - 'ses:SendRawEmail'
+                Resource: !Join
+                  - ''
+                  - - 'arn:aws:ses:*:'
+                    - !Ref AWS::AccountId
+                    - ':identity/*'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+  ecsServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ecs.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole
+  ecsInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref ecsInstanceRole
+      Path: '/'
+  ecrUser:
+    Type: AWS::IAM::User
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
+      UserName: !Join
+        - '-'
+        - - !Ref ClusterName
+          - 'ecr-user'
+  ecrUserAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref ecrUser
+  vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: "172.31.0.0/16"
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+  routeTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        !Ref vpc
+  subnetZoneARoutingTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref routeTable
+      SubnetId: !Ref subnetZoneA
+  subnetZoneBRoutingTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref routeTable
+      SubnetId: !Ref subnetZoneB
+  internetGateway:
+    Type: AWS::EC2::InternetGateway
+  internetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref vpc
+      InternetGatewayId: !Ref internetGateway
+  route:
+    DependsOn:
+      - internetGateway
+      - routeTable
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref routeTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref internetGateway
+  subnetZoneA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: "172.31.2.0/24"
+      AvailabilityZone: "us-east-1a"
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref vpc
+  subnetZoneB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: "172.31.3.0/24"
+      AvailabilityZone: "us-east-1b"
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref vpc
+  route53RecordSet:
+    DependsOn:
+      - loadBalancer
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt loadBalancer.DNSName
+        HostedZoneId: !GetAtt loadBalancer.CanonicalHostedZoneID
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+  ec2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join
+        - '-'
+        - - !Ref ClusterName
+          - '-ec2'
+          - '-sg'
+      GroupDescription: "Secucrity group with access only from load balancer"
+      VpcId: !Ref vpc
+      SecurityGroupIngress:
+        -
+          IpProtocol: "-1"
+          SourceSecurityGroupId: !Ref loadBalancerSecurityGroup
+  loadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join
+        - '-'
+        - - !Ref ClusterName
+          - '-loadbalancer'
+          - '-sg'
+      GroupDescription: "LoadBalancer security group with access from port 80 and 443 and 7788 for device WS connection"
+      VpcId: !Ref vpc
+      SecurityGroupIngress:
+        -
+          IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "0.0.0.0/0"
+        -
+          IpProtocol: "tcp"
+          FromPort: 7788
+          ToPort: 7788
+          CidrIp: "0.0.0.0/0"
+        -
+          IpProtocol: "tcp"
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "0.0.0.0/0"
+  apiTaskDefinition:
+      Type: AWS::ECS::TaskDefinition
+      Properties:
+        Family: !Join
+          - '-'
+          - - !Ref cluster
+            - !Ref ApiName
+            - 'td'
+        ContainerDefinitions:
+          - Name: !Ref ApiName
+            Cpu: 600
+            Memory: 800
+            MemoryReservation: 800
+            Image: !Join
+              - ''
+              - - !Ref RepositoryName
+                - !Ref ApiName
+                - ':'
+                - !Ref DockerImageTag
+            PortMappings:
+              - ContainerPort: 80
+                HostPort: 0
+            LogConfiguration:
+              LogDriver: "awslogs"
+              Options:
+                awslogs-group: !Ref apiLogGroup
+                awslogs-region: "us-east-1"
+            Environment:
+              - Name: SPRING_DATASOURCE_URL
+                Value: !Join
+                  - ''
+                  - - "jdbc:postgresql://"
+                    - !GetAtt database.Endpoint.Address
+                    - ":"
+                    -  !GetAtt database.Endpoint.Port
+                    - "/"
+                    - !Ref DatabaseName
+              - Name: SPRING_DATASOURCE_USERNAME
+                Value: !Ref DatasourceUser
+              - Name: SPRING_DATASOURCE_PASSWORD
+                Value: !Ref DatasourcePassword
+              - Name: SERVER_PORT
+                Value: '80'
+              - Name: SPRING_PROFILES_ACTIVE
+                Value: !Ref ActiveProfile
+              - Name: CLOUD_AWS_SQS_API-QUEUE
+                value: !GetAtt apiQueue.QueueName
+              - Name: CLOUD_AWS_SQS_DEVICE-QUEUE
+                value: !GetAtt deviceQueue.QueueName
+  apiService:
+      Type: AWS::ECS::Service
+      DependsOn:
+        - autoScalingGroup
+        - loadBalancer
+        - apiTargetGroup
+        - apiListenerRule
+      Properties:
+        Cluster: !Ref cluster
+        TaskDefinition: !Ref apiTaskDefinition
+        DeploymentConfiguration:
+          MaximumPercent : 100
+          MinimumHealthyPercent : 0
+        ServiceName: !Join
+          - '-'
+          - - !Ref cluster
+            - !Ref ApiName
+            - 'service'
+        DesiredCount: 1
+        LoadBalancers:
+          - TargetGroupArn: !Ref apiTargetGroup
+            ContainerPort: 80
+            ContainerName: !Ref ApiName
+        Role: !Ref 'ecsServiceRole'
+  deviceService:
+      Type: AWS::ECS::Service
+      DependsOn:
+        - autoScalingGroup
+        - loadBalancer
+        - deviceServiceTargetGroup
+        - deviceServiceListenerRule
+      Properties:
+        Cluster: !Ref cluster
+        TaskDefinition: !Ref deviceServiceTaskDefinition
+        DeploymentConfiguration:
+          MaximumPercent : 100
+          MinimumHealthyPercent : 0
+        ServiceName: !Join
+          - '-'
+          - - !Ref cluster
+            - !Ref DeviceServiceName
+            - 'service'
+        DesiredCount: 1
+        LoadBalancers:
+          - TargetGroupArn: !Ref deviceServiceTargetGroup
+            ContainerPort: 7788
+            ContainerName: !Ref DeviceServiceName
+        Role: !Ref 'ecsServiceRole'
+  deviceServiceTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Join
+        - '-'
+        - - !Ref cluster
+          - !Ref DeviceServiceName
+          - 'td'
+      ContainerDefinitions:
+        - Name: !Ref DeviceServiceName
+          Cpu: 600
+          Memory: 800
+          MemoryReservation: 800
+          Image: !Join
+            - ''
+            - - !Ref RepositoryName
+              - !Ref DeviceServiceName
+              - ':'
+              - !Ref DockerImageTag
+          PortMappings:
+            - ContainerPort: 7788
+              HostPort: 0
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-group: !Ref deviceServiceLogGroup
+              awslogs-region: "us-east-1"
+          Environment:
+            - Name: SPRING_DATASOURCE_URL
+              Value: !Join
+                - ''
+                - - "jdbc:postgresql://"
+                  - !GetAtt database.Endpoint.Address
+                  - ":"
+                  - !GetAtt database.Endpoint.Port
+                  - "/"
+                  - !Ref DatabaseName
+            - Name: SPRING_DATASOURCE_USERNAME
+              Value: !Ref DatasourceUser
+            - Name: SPRING_DATASOURCE_PASSWORD
+              Value: !Ref DatasourcePassword
+            - Name: SERVER_PORT
+              Value: '7788'
+            - Name: SPRING_PROFILES_ACTIVE
+              Value: !Ref ActiveProfile
+            - Name: CLOUD_AWS_SQS_API-QUEUE
+              value: !GetAtt apiQueue.QueueName
+            - Name: CLOUD_AWS_SQS_DEVICE-QUEUE
+              value: !GetAtt deviceQueue.QueueName
+  apiQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Join
+        - '-'
+        - - 'api'
+          - !Ref ClusterName
+  deviceQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Join
+        - '-'
+        - - 'device'
+          - !Ref ClusterName
+  queuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !Ref apiQueue
+            Principal:
+              AWS:
+                - !Ref AWS::AccountId
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !Ref deviceQueue
+            Principal:
+              AWS:
+                - !Ref AWS::AccountId
+      Queues:
+        - !Ref deviceQueue
+        - !Ref apiQueue
+  apiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join
+        - '-'
+        - - !Ref cluster
+          - !Ref ApiName
+      RetentionInDays: 1
+  deviceServiceLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join
+        - '-'
+        - - !Ref cluster
+          - !Ref DeviceServiceName
+      RetentionInDays: 1
+  apiTargetGroup:
+    DependsOn:
+      - loadBalancer
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Join
+        - '-'
+        - - !Ref ApiName
+          - 'tg'
+      VpcId:
+        !Ref vpc
+      Protocol: "HTTP"
+      Port: 80
+      HealthCheckProtocol: "HTTP"
+      HealthCheckPort: "traffic-port"
+      HealthCheckIntervalSeconds: 35
+      HealthCheckTimeoutSeconds: 30
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 2
+      HealthCheckPath: "/api/healthcheck"
+      Matcher:
+        HttpCode: "200"
+      TargetType: "instance"
+      TargetGroupAttributes:
+        -
+          Key: "deregistration_delay.timeout_seconds"
+          Value: "0"
+  deviceServiceTargetGroup:
+    DependsOn:
+      - loadBalancer
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Join
+        - '-'
+        - - !Ref DeviceServiceName
+          - 'tg'
+      VpcId:
+        !Ref vpc
+      Protocol: "HTTP"
+      Port: 7788
+      HealthCheckProtocol: "HTTP"
+      HealthCheckPort: "traffic-port"
+      HealthCheckIntervalSeconds: 35
+      HealthCheckTimeoutSeconds: 30
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 2
+      HealthCheckPath: "/pub/healthcheck"
+      Matcher:
+        HttpCode: "200"
+      TargetType: "instance"
+      TargetGroupAttributes:
+        -
+          Key: "deregistration_delay.timeout_seconds"
+          Value: "0"
+  apiListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref listenerHttps
+      Priority: 1
+      Conditions:
+        -
+          Field: "path-pattern"
+          Values:
+            - "/api/*"
+      Actions:
+        -
+          Type: "forward"
+          TargetGroupArn: !Ref apiTargetGroup
+  deviceServiceListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref listenerHttpDevicePort
+      Priority: 1
+      Conditions:
+        -
+          Field: "path-pattern"
+          Values:
+            - "/pub/*"
+      Actions:
+        -
+          Type: "forward"
+          TargetGroupArn: !Ref deviceServiceTargetGroup
+  uiTaskDefinition:
+      Type: AWS::ECS::TaskDefinition
+      Properties:
+        Family: !Join
+          - '-'
+          - - !Ref cluster
+            - !Ref UIName
+            - 'td'
+        ContainerDefinitions:
+          - Name: !Ref UIName
+            Cpu: 400
+            Memory: 100
+            MemoryReservation: 100
+            Image: !Join
+              - ''
+              - - !Ref RepositoryName
+                - !Ref UIName
+                - ':'
+                - !Ref DockerImageTag
+            PortMappings:
+              - ContainerPort: 80
+                HostPort: 0
+  uiService:
+      Type: AWS::ECS::Service
+      DependsOn:
+        - autoScalingGroup
+        - loadBalancer
+        - uiTargetGroup
+        - uiListenerRuleHttps
+        - uiListenerRuleHttp
+      Properties:
+        Cluster: !Ref cluster
+        TaskDefinition: !Ref uiTaskDefinition
+        DeploymentConfiguration:
+          MaximumPercent : 100
+          MinimumHealthyPercent : 0
+        ServiceName: !Join
+          - '-'
+          - - !Ref cluster
+            - !Ref UIName
+            - 'service'
+        DesiredCount: 1
+        LoadBalancers:
+          - TargetGroupArn: !Ref uiTargetGroup
+            ContainerPort: 80
+            ContainerName: !Ref UIName
+        Role: !Ref 'ecsServiceRole'
+  uiTargetGroup:
+    DependsOn:
+      - loadBalancer
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Join
+        - '-'
+        - - !Ref UIName
+          - 'tg'
+      VpcId: !Ref vpc
+      Protocol: "HTTP"
+      Port: 80
+      HealthCheckProtocol: "HTTP"
+      HealthCheckPort: "traffic-port"
+      HealthCheckIntervalSeconds: 35
+      HealthCheckTimeoutSeconds: 30
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 2
+      HealthCheckPath: "/"
+      Matcher:
+        HttpCode: "200"
+      TargetType: "instance"
+      TargetGroupAttributes:
+        -
+          Key: "deregistration_delay.timeout_seconds"
+          Value: "0"
+  uiListenerRuleHttps:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref listenerHttps
+      Priority: 3
+      Conditions:
+        -
+          Field: "path-pattern"
+          Values:
+            - "/"
+      Actions:
+        -
+          Type: "forward"
+          TargetGroupArn: !Ref uiTargetGroup
+  uiListenerRuleHttp:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref listenerHttp
+      Priority: 2
+      Conditions:
+        -
+          Field: "path-pattern"
+          Values:
+            - "/"
+      Actions:
+        -
+          Type: "forward"
+          TargetGroupArn: !Ref uiTargetGroup
+  loadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    DependsOn:
+      - subnetZoneA
+      - subnetZoneB
+      - loadBalancerSecurityGroup
+    Properties:
+      Name: !Join
+        - '-'
+        - - !Ref cluster
+          - 'lb'
+      Scheme: "internet-facing"
+      IpAddressType: "ipv4"
+      Type: "application"
+      SecurityGroups:
+        - !Ref loadBalancerSecurityGroup
+      Subnets:
+        - !Ref subnetZoneA
+        - !Ref subnetZoneB
+  listenerHttps:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: "forward"
+          TargetGroupArn: !Ref uiTargetGroup
+      Certificates:
+        - CertificateArn: !Ref CertificateArn
+      LoadBalancerArn: !Ref loadBalancer
+      Port: 443
+      Protocol: "HTTPS"
+  listenerHttp:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        -
+          Type: "forward"
+          TargetGroupArn: !Ref uiTargetGroup
+      LoadBalancerArn: !Ref loadBalancer
+      Port: 80
+      Protocol: "HTTP"
+  listenerHttpDevicePort:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        -
+          Type: "forward"
+          TargetGroupArn: !Ref deviceServiceTargetGroup
+      LoadBalancerArn: !Ref loadBalancer
+      Port: 7788
+      Protocol: "HTTP"
+  launchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !Ref InstanceImageId
+      SecurityGroups:
+        - !Ref ec2SecurityGroup
+      KeyName: !Ref InstanceKeyPair
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            echo ECS_CLUSTER=${cluster} >> /etc/ecs/ecs.config
+            sudo yum install -y python34
+            curl -O https://bootstrap.pypa.io/get-pip.py
+            python3 get-pip.py --user
+            export PATH=~/.local/bin:$PATH
+            source ~/.bash_profile
+            pip install --upgrade --user awscli
+            aws configure set default.region us-east-1
+            aws configure set aws_access_key_id ${ecrUserAccessKey}
+            aws configure set aws_secret_access_key ${ecrUserAccessKey.SecretAccessKey}
+            eval $(aws ecr get-login --no-include-email | sed 's|https://||')
+      InstanceType: !Ref InstanceType
+      InstanceMonitoring: true
+      IamInstanceProfile: !Ref ecsInstanceProfile
+      EbsOptimized: false
+  autoScalingGroup:
+    DependsOn:
+      - subnetZoneA
+      - subnetZoneB
+      - launchConfiguration
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref subnetZoneA
+        - !Ref subnetZoneB
+      Cooldown: "60"
+      DesiredCapacity: "1"
+      HealthCheckGracePeriod: 0
+      HealthCheckType: EC2
+      LaunchConfigurationName: !Ref launchConfiguration
+      MaxSize: "1"
+      MinSize: "0"
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ClusterName
+              - 'cluster'
+              - 'instance'
+          PropagateAtLaunch: true
+  dataBaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+        DBSubnetGroupDescription: Database subnet, to create a database into a vpc
+        SubnetIds:
+          - !Ref subnetZoneA
+          - !Ref subnetZoneB
+  databaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: DatabaseSecurityGroup
+      GroupDescription: Database Security Group
+      VpcId: !Ref vpc
+      SecurityGroupIngress:
+        -
+          Description: EC2 to database access security group
+          IpProtocol: "-1"
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref ec2SecurityGroup
+  database:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: !Ref DataBaseStorage
+      BackupRetentionPeriod: !Ref DatabaseRetentionPeriod
+      DBInstanceClass: !Ref DBInstanceType
+      DBInstanceIdentifier: !Ref DatabaseInstanceName
+      DBName: !Ref DatabaseName
+      Engine: postgres
+      EngineVersion: 12.9
+      MasterUsername: !Ref DatasourceUser
+      MasterUserPassword: !Ref DatasourcePassword
+      MultiAZ: !If [createMultiZone, true, false]
+      Port: 5432
+      PubliclyAccessible: true
+      StorageType: gp2
+      DBSubnetGroupName: !Ref dataBaseSubnetGroup
+      DeletionProtection: true
+      VPCSecurityGroups:
+        - !Ref databaseSecurityGroup
+Outputs:
+  Cluster:
+    Value: !Ref cluster
+  LoadBalancer:
+    Value: !GetAtt loadBalancer.DNSName
+  Database:
+    Description: AWS Database URL plublic DNS
+    Value: !Join
+      - ':'
+      - - !GetAtt database.Endpoint.Address
+        - !GetAtt database.Endpoint.Port
+    Export:
+      Name: 'DatabaseUrl'

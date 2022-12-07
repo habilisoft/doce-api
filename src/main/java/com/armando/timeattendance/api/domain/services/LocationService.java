@@ -18,7 +18,7 @@ public class LocationService {
 
     public Location createLocation(CreateLocation request) {
         Location location = Location.builder()
-                .name(request.name())
+                .name(request.getName())
                 .build();
         return locationRepository.save(location);
     }

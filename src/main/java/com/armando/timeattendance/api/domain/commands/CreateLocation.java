@@ -5,5 +5,7 @@ import lombok.Data;
 /**
  * Created on 11/11/22.
  */
-public record CreateLocation(String name) {
+@Data
+public class CreateLocation {
+    private String name;
 }

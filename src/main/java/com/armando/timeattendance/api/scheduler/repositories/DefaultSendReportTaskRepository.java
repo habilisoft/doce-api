@@ -4,16 +4,17 @@ import com.armando.timeattendance.api.scheduler.model.ScheduledReport;
 import com.armando.timeattendance.api.scheduler.model.SendReportTask;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created on 3/12/22.
  */
 @Repository
-public class DefaultSendReportTaskRepository implements SendReportTaskRepository{
+public class DefaultSendReportTaskRepository implements SendReportTaskRepository {
     @Override
     public List<SendReportTask> getTasks() {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
