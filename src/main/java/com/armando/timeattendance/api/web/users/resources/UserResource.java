@@ -3,8 +3,10 @@ package com.armando.timeattendance.api.web.users.resources;
 import com.armando.timeattendance.api.auth.model.User;
 import com.armando.timeattendance.api.auth.repositories.UserRepository;
 import com.armando.timeattendance.api.auth.services.UserService;
+import com.armando.timeattendance.api.config.StartupHousekeeper;
 import com.armando.timeattendance.api.web.users.dto.ChangePasswordRequest;
 import com.armando.timeattendance.api.web.users.dto.UserResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,16 +30,13 @@ import java.util.Optional;
  */
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserResource {
     private final UserService userService;
-
-    public UserResource(final UserService userService) {
-        this.userService = userService;
-    }
-
+    private final StartupHousekeeper startupHousekeeper;
 
     @GetMapping("/me")
-    public ResponseEntity getCurrentUser(@AuthenticationPrincipal User user) {
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal User user) {
 
         return ResponseEntity.ok(
                 UserResponse.builder()
@@ -55,6 +54,11 @@ public class UserResource {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changePassword(@RequestBody ChangePasswordRequest request) {
         userService.changePassword(request.getOldPassword(), request.getNewPassword());
+    }
+
+    @GetMapping("/default-user")
+    void du() {
+        startupHousekeeper.createUser("superadmin");
     }
 
 }
