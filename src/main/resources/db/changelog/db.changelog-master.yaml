@@ -5,3 +5,5 @@ databaseChangeLog:
       file: classpath:/migrations/public/add-users-columns.sql
 - include:
     file: classpath:/migrations/public/1-create-sequences.sql
+- include:
+    file: classpath:/migrations/public/2-create-user-sequence.sql
