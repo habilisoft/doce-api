@@ -29,19 +29,6 @@ spring:
       max-file-size: 10MB
   main:
     allow-bean-definition-overriding: true
-cloud:
-  aws:
-    stack:
-      auto: false
-    region:
-      static: us-east-1
-    credentials:
-      accessKey: AKIA3U2JKO4T27DYS7ET
-      secretKey: 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
-    sqs:
-      api-queue: doce-api-local
-      device-queue: doce-device-local
-
 jwt:
   secret: Ws_rh+h*p)4=SzFC
 token-encryption:
@@ -50,3 +37,13 @@ token-encryption:
 application:
   oauthPassword: Ws_rh+h*p)4=SzFC
   oauthPassword2: ~kF3gs.BP2-Cwfw28_yS-xmB6C~4wU-Cmf
+mail:
+  sender: SES
+  ses:
+    fromAddress: reportes@doce.do
+cloud:
+  aws:
+    stack:
+      auto: false
+    region:
+      static: us-east-1
