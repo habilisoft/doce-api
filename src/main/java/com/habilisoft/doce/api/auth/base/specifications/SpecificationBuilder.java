@@ -1,6 +1,6 @@
 package com.habilisoft.doce.api.auth.base.specifications;
 
-import liquibase.repackaged.org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;

@@ -1,6 +1,8 @@
 package com.habilisoft.doce.api.scheduler.services;
 
 import com.habilisoft.doce.api.config.multitenant.TenantContext;
+import com.habilisoft.doce.api.email.models.PlainTextEmailRequest;
+import com.habilisoft.doce.api.email.services.MailService;
 import com.habilisoft.doce.api.scheduler.model.ScheduledReport;
 import com.habilisoft.doce.api.scheduler.model.SendReportTask;
 import com.habilisoft.doce.api.persistence.scheduler.repositories.ScheduledReportRepository;
@@ -18,6 +20,7 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 @RequiredArgsConstructor
 public class ReportSender {
     private final ScheduledReportRepository scheduledReportRepository;
+    private final MailService mailService;
 
     public void sendReport(SendReportTask task) {
         String tenant = task.getTenant();
@@ -26,6 +29,14 @@ public class ReportSender {
                 kv("task", task));
 
         ScheduledReport report = task.getScheduledReport();
+
+        mailService.sendPlainTextMessage(
+                PlainTextEmailRequest.builder()
+                        .subject("Reporte")
+                        .to(report.getRecipients())
+                        .text("El reporte aqui")
+                        .build()
+        );
 
         TenantContext.setCurrentTenant(task.getTenant());
 

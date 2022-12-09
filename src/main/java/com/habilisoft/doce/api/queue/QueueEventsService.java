@@ -1,4 +1,4 @@
-package com.habilisoft.doce.api.services;
+package com.habilisoft.doce.api.queue;
 
 import com.habilisoft.doce.api.config.multitenant.TenantContext;
 import com.habilisoft.doce.api.domain.model.Employee;

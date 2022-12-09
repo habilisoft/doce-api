@@ -29,7 +29,7 @@ public class SendReportTaskEntity extends BaseEntity {
     @SequenceGenerator(name = "send_report_tasks_id_seq", sequenceName = "send_report_tasks_id_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "send_report_tasks_id_seq")
     private Long id;
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     private ScheduledReportEntity scheduledReport;
     private String timeZone;
     private String cronExpression;
