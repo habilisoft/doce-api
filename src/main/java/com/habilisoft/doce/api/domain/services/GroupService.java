@@ -23,4 +23,12 @@ public class GroupService {
                         .build()
         );
     }
+
+    public void updateGrop(Long groupId, CreateGroup request) {
+       groupRepository.findById(groupId)
+                .ifPresent(g -> {
+                    g.setName(request.getName());
+                    groupRepository.save(g);
+                });
+    }
 }

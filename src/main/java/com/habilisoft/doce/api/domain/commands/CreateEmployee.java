@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class CreateEmployee {
     private String fullName;
     private String documentNumber;
-    private String externalId;
+    private Integer enrollId;
     private Long groupId;
     private Long locationId;
     private LocationType locationType;

@@ -12,11 +12,14 @@ import com.habilisoft.doce.api.dto.device.DeleteUser;
 import com.habilisoft.doce.api.dto.device.SendUserToAllDevices;
 import com.habilisoft.doce.api.dto.device.SendUserDataToDevice;
 import com.habilisoft.doce.api.queue.SqsQueueSender;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import static net.logstash.logback.argument.StructuredArguments.e;
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
 /**
@@ -24,45 +27,26 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class EmployeeDeviceService {
     private final DeviceRepository deviceRepository;
     private final EmployeeRepository employeeRepository;
     private final SqsQueueSender queueSender;
-
-    public EmployeeDeviceService(final DeviceRepository deviceRepository,
-                                 final EmployeeRepository employeeRepository,
-                                 final SqsQueueSender queueSender) {
-        this.deviceRepository = deviceRepository;
-        this.employeeRepository = employeeRepository;
-        this.queueSender = queueSender;
-    }
+    private final ApplicationEventPublisher eventPublisher;
 
     @TransactionalEventListener
     public void onEmployeeEditedEvent(EmployeeEditedEvent event) {
         Employee oldData = event.getOldEmployee();
         Employee newData = event.getNewEmployee();
         log.info("Received employee edited event {} {}", kv("newValue", newData), kv("oldValue", oldData));
-        switch (newData.getLocationType()) {
-            case FIXED -> {
-                if(!oldData.getLocation().equals(newData.getLocation())) {
-                    removeEmployeeDataFromDevice(oldData);
-                    sendEmployeeDataToDevice(newData);
-                }
-            }
-            case AMBULATORY -> sendEmployeeDataToAllDevices(newData);
-        }
+        sendEmployeeDataToAllDevices(newData);
     }
 
     @TransactionalEventListener
     public void onEmployeeCreatedEvent(EmployeeCreatedEvent event) {
         Employee employee = event.getEmployee();
-
         log.info("Received employee created event {}", kv("employee", employee));
-
-        switch (employee.getLocationType()) {
-            case FIXED -> sendEmployeeDataToDevice(employee);
-            case AMBULATORY -> sendEmployeeDataToAllDevices(employee);
-        }
+        sendEmployeeDataToAllDevices(employee);
     }
 
     public void sendEmployeeDataToDevice(final Long employeeId) {
@@ -72,6 +56,10 @@ public class EmployeeDeviceService {
     }
 
     public void sendEmployeeDataToDevice(final Employee employee) {
+        if(employee.getLocation() == null) {
+            sendEmployeeDataToAllDevices(employee);
+            return;
+        }
         Device device = deviceRepository.findByLocation(employee.getLocation())
                         .orElse(null);
         if(device == null) {
@@ -131,18 +119,19 @@ public class EmployeeDeviceService {
         queueSender.convertAndSend(deleteUser);
     }
 
-    public void registerEmployee() {
-
-    }
-
     @Transactional
     public Employee saveEmployeeDeviceData(SendUserDataToDevice sendUserDataToDevice) {
         Integer enrollId = sendUserDataToDevice.getEnrollId();
         String fpData = sendUserDataToDevice.getRecord();
         Employee employee = employeeRepository.findByEnrollId(enrollId)
-                .orElseThrow();
+                .orElse(Employee.builder()
+                        .enrollId(enrollId)
+                        .build());
         employee.setFingerprintData(fpData);
         employeeRepository.save(employee);
+
+        sendEmployeeDataToAllDevices(employee);
+
         return employee;
     }
 }

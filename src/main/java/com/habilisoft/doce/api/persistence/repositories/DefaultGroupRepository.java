@@ -30,4 +30,10 @@ public class DefaultGroupRepository implements GroupRepository {
         return jpaRepo.findByNameIgnoreCase(name)
                 .map(converter::fromJpaEntity);
     }
+
+    @Override
+    public Optional<Group> findById(Long id) {
+        return jpaRepo.findById(id)
+                .map(converter::fromJpaEntity);
+    }
 }

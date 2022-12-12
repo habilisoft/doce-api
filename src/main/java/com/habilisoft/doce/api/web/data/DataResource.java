@@ -1,5 +1,6 @@
 package com.habilisoft.doce.api.web.data;
 
+import com.habilisoft.doce.api.domain.model.Report;
 import com.habilisoft.doce.api.domain.model.WorkShiftDay;
 import com.habilisoft.doce.api.serialization.BaseEnumConverter;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -20,6 +21,7 @@ public class DataResource {
     public ResponseEntity<?> getData() {
         Data data = Data.builder()
                 .days(WorkShiftDay.values())
+                .reports(Report.values())
                 .build();
         return ResponseEntity.ok(data);
     }
@@ -29,5 +31,7 @@ public class DataResource {
     public static class Data {
         @JsonSerialize(contentConverter = BaseEnumConverter.class)
         WorkShiftDay[] days;
+        @JsonSerialize(contentConverter = BaseEnumConverter.class)
+        Report[] reports;
     }
 }

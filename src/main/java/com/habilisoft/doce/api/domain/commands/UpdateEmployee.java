@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateEmployee {
     private Long id;
+    private Integer enrollId;
     private String fullName;
     private String documentNumber;
     private String externalId;

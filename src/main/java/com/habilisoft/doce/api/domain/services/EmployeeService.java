@@ -4,7 +4,7 @@ import com.habilisoft.doce.api.domain.commands.CreateEmployee;
 import com.habilisoft.doce.api.domain.commands.UpdateEmployee;
 import com.habilisoft.doce.api.domain.events.EmployeeCreatedEvent;
 import com.habilisoft.doce.api.domain.events.EmployeeEditedEvent;
-import com.habilisoft.doce.api.domain.exceptions.DocumentNumberConflictException;
+import com.habilisoft.doce.api.domain.exceptions.DuplicatedEnrollIdException;
 import com.habilisoft.doce.api.domain.exceptions.EmployeeNotFoundException;
 import com.habilisoft.doce.api.domain.model.Group;
 import com.habilisoft.doce.api.domain.model.Employee;
@@ -31,18 +31,25 @@ public class EmployeeService {
 
     @Transactional
     public Employee create(CreateEmployee request) {
-        final Optional<Employee> employeeExists = repository.findByDocumentNumber(request.getDocumentNumber());
+        final Optional<Employee> employeeExists = repository.findByEnrollId(request.getEnrollId());
 
         if (employeeExists.isPresent()) {
-            throw new DocumentNumberConflictException(request.getDocumentNumber());
+            throw new DuplicatedEnrollIdException(request.getEnrollId());
         }
         Employee employee = Employee.builder()
                 .fullName(request.getFullName())
-                .externalId(request.getExternalId())
                 .documentNumber(request.getDocumentNumber())
-                .location(Location.ofId(request.getLocationId()))
-                .group(Group.ofId(request.getGroupId()))
-                .enrollId(repository.getNextEnrollId())
+                .enrollId(request.getEnrollId())
+                .location(
+                        Optional.ofNullable(request.getLocationId())
+                                .map(Location::ofId)
+                                .orElse(null)
+                )
+                .group(
+                        Optional.ofNullable(request.getGroupId())
+                                .map(Group::ofId)
+                                .orElse(null)
+                )
                 .locationType(request.getLocationType())
                 .build();
 
@@ -53,7 +60,39 @@ public class EmployeeService {
                         .employee(employee)
                         .source(this)
                         .build());
+        return employee;
+    }
 
+    @Transactional
+    public Employee update(Long employeeId, UpdateEmployee request) {
+        Employee employee = repository.findById(employeeId)
+                .orElseThrow(() -> new EmployeeNotFoundException(employeeId));
+
+        final Optional<Employee> employeeExists = repository.findByEnrollId(request.getEnrollId());
+
+        if(employeeExists.isPresent() && !employeeExists.get().getId().equals(employeeId)) {
+            throw new DuplicatedEnrollIdException(request.getEnrollId());
+        }
+
+        Employee oldEmployee = modelMapper.map(employee, Employee.class);
+
+        employee.setFullName(request.getFullName());
+        employee.setDocumentNumber(request.getDocumentNumber());
+        employee.setLocation(request.getLocation());
+        employee.setLocationType(
+                Optional.ofNullable(request.getLocation())
+                        .map((e) -> LocationType.FIXED)
+                        .orElse(LocationType.AMBULATORY));
+
+        employee.setGroup(request.getGroup());
+        employee = repository.save(employee);
+
+        eventPublisher.publishEvent(
+                EmployeeEditedEvent.builder()
+                        .oldEmployee(oldEmployee)
+                        .newEmployee(employee)
+                        .source(this)
+                        .build());
         return employee;
     }
 
@@ -133,32 +172,6 @@ public class EmployeeService {
 
     public Optional<Employee> findById(final Long id) {
         return this.repository.findById(id);
-    }
-
-    public Employee update(Long employeeId, UpdateEmployee request) {
-        Employee employee = repository.findById(employeeId)
-                .orElseThrow(() -> new EmployeeNotFoundException(employeeId));
-        Employee oldEmployee = modelMapper.map(employee, Employee.class);
-
-        employee.setFullName(request.getFullName());
-        employee.setExternalId(request.getExternalId());
-        employee.setDocumentNumber(request.getDocumentNumber());
-        employee.setLocation(request.getLocation());
-        employee.setLocationType(
-                Optional.ofNullable(request.getLocation())
-                        .map((e)-> LocationType.FIXED)
-                        .orElse(LocationType.AMBULATORY));
-
-        employee.setGroup(request.getGroup());
-        employee = repository.save(employee);
-
-        eventPublisher.publishEvent(
-                EmployeeEditedEvent.builder()
-                        .oldEmployee(oldEmployee)
-                        .newEmployee(employee)
-                        .source(this)
-                        .build());
-        return employee;
     }
 
     /*public WorkShift getEmployeeWorkShift(final Long employeeId) {

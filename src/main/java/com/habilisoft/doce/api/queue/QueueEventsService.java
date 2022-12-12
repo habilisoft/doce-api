@@ -18,16 +18,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 /**
  * Created on 2019-04-21.
  */
-@Log
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QueueEventsService {
@@ -42,7 +45,13 @@ public class QueueEventsService {
         try {
 
             QueueEvent queueEvent = new ObjectMapper().readValue(message, QueueEvent.class);
-            setTenant(queueEvent.getDeviceSerialNumber());
+            if(!setTenant(queueEvent.getDeviceSerialNumber())) {
+
+                log.warn(
+                        "Device not associated with a client {}",
+                        kv("serialNumber",queueEvent.getDeviceSerialNumber()));
+                return;
+            }
 
             if (queueEvent.type != null) {
                 switch (queueEvent.type) {
@@ -100,15 +109,16 @@ public class QueueEventsService {
         }
     }
 
-    private void setTenant(final String deviceSerialNumber) {
+    private boolean setTenant(final String deviceSerialNumber) {
         TenantContext.setCurrentTenant(null);
         final String tenant = clientDeviceRepository.getClientTenantByDeviceSerialNumber(deviceSerialNumber);
 
         if(tenant == null) {
-            return ;
+            return false;
         }
 
         TenantContext.setCurrentTenant(tenant);
+        return true;
     }
 
     /*private void sendResponse(final WebSocketSession session, final Command.Type commandType) {
@@ -173,7 +183,7 @@ public class QueueEventsService {
             //sendResponse(session, Command.Type.SEND_USER);
             //deviceService.setUserName(session, sendUser.getEnrollId());
         } catch (Exception e) {
-            log.warning(String.format("Could not send user data to device. Exception is: %s", e.getMessage()));
+            log.warn(String.format("Could not send user data to device. Exception is: %s", e.getMessage()));
         }
     }
 

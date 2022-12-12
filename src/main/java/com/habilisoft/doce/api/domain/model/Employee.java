@@ -16,7 +16,6 @@ public class Employee {
     private Long id;
     private String fullName;
     private Integer enrollId;
-    private String externalId;
     private String documentNumber;
     private Location location;
     private String fingerprintData;

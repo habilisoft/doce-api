@@ -36,9 +36,9 @@ public class EmployeeImporter {
     }
 
     public Employee createOrUpdateEmployee(ImportEmployeeRequest req) {
-        Employee employee = employeeRepository.findByDocumentNumber(req.getDocumentNumber())
+        Employee employee = employeeRepository.findByEnrollId(req.getEnrollId())
                 .orElse(Employee.builder()
-                        .enrollId(employeeRepository.getNextEnrollId())
+                        .enrollId(req.getEnrollId())
                         .documentNumber(req.getDocumentNumber())
                         .build());
 
@@ -46,7 +46,6 @@ public class EmployeeImporter {
         employee.setGroup(getOrCreateGroup(req.getGroupName()));
         employee.setLocation(getOrCreateLocation(req.getLocationName()));
         employee.setWorkShift(getOrCreateWorkShift(req.getWorkShiftName()));
-        employee.setExternalId(req.getExternalId());
 
         return employeeRepository.save(employee);
     }

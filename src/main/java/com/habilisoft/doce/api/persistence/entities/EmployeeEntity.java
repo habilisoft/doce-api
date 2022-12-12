@@ -44,9 +44,6 @@ public class EmployeeEntity extends BaseEntity {
     @Column(name = "enroll_id", unique = true)
     private Integer enrollId;
 
-    @Column(name = "external_id")
-    private String externalId;
-
     @Column(name = "document_number")
     private String documentNumber;
 

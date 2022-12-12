@@ -8,4 +8,5 @@ import lombok.Data;
 @Data
 public class CreateGroup {
     private String name;
+    private Long id;
 }

@@ -96,4 +96,13 @@ public class DeviceService {
                                     .build());
                 });
     }
+
+    @Transactional
+    public void edit(String serialNumber, Device device) {
+        deviceRepository.getBySerialNumber(serialNumber)
+                .ifPresent(dev -> {
+                    dev.setDescription(device.getDescription());
+                    deviceRepository.save(dev);
+                });
+    }
 }

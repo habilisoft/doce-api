@@ -10,7 +10,7 @@ import lombok.Data;
 @Builder
 public class ImportEmployeeRequest {
     private Long line;
-    private String externalId;
+    private Integer enrollId;
     private String name;
     private String documentNumber;
     private String groupName;
