@@ -1,5 +1,6 @@
 package com.habilisoft.doce.api.domain.commands;
 
+import com.habilisoft.doce.api.domain.model.Group;
 import com.habilisoft.doce.api.domain.model.LocationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +18,7 @@ public class CreateEmployee {
     private String fullName;
     private String documentNumber;
     private Integer enrollId;
-    private Long groupId;
+    private Group group;
     private Long locationId;
     private LocationType locationType;
 }

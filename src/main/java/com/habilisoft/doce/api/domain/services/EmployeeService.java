@@ -45,11 +45,7 @@ public class EmployeeService {
                                 .map(Location::ofId)
                                 .orElse(null)
                 )
-                .group(
-                        Optional.ofNullable(request.getGroupId())
-                                .map(Group::ofId)
-                                .orElse(null)
-                )
+                .group(request.getGroup())
                 .locationType(request.getLocationType())
                 .build();
 
