@@ -46,15 +46,15 @@ public class EmployeeCsvParser {
     private ImportEmployeeRequest convert(CSVRecord record) {
         String NAME_HEADER = "nombre";
         String DOCUMENT_HEADER = "cedula";
+        String ID_HEADER = "codigo";
         String GROUP_HEADER = "grupo";
-        String LOCATION_HEADER = "ubicacion";
         String WORK_SHIFT_HEADER = "turno";
 
         return ImportEmployeeRequest.builder()
                 .name(record.get(NAME_HEADER))
                 .documentNumber(record.get(DOCUMENT_HEADER))
+                .enrollId(Integer.parseInt(record.get(ID_HEADER)))
                 .groupName(record.get(GROUP_HEADER))
-                .locationName(record.get(LOCATION_HEADER))
                 .workShiftName(record.get(WORK_SHIFT_HEADER))
                 .line(record.getRecordNumber())
                 .build();
