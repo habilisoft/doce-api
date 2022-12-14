@@ -3,6 +3,7 @@ package com.habilisoft.doce.api.domain.services;
 import com.habilisoft.doce.api.config.multitenant.TenantContext;
 import com.habilisoft.doce.api.domain.events.DeviceConnectedEvent;
 import com.habilisoft.doce.api.domain.events.DeviceDisconnectedEvent;
+import com.habilisoft.doce.api.domain.exceptions.DeviceNotFoundException;
 import com.habilisoft.doce.api.domain.model.Device;
 import com.habilisoft.doce.api.domain.model.Location;
 import com.habilisoft.doce.api.domain.repositories.DeviceRepository;
@@ -15,6 +16,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
 /**
@@ -26,6 +30,7 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 public class DeviceService {
     private final DeviceRepository deviceRepository;
     private final ApplicationEventPublisher publisher;
+    private final EmployeeDeviceService employeeDeviceService;
 
     @Transactional
     public void registerDevice(RegisterDevice registerDevice) {
@@ -104,5 +109,11 @@ public class DeviceService {
                     dev.setDescription(device.getDescription());
                     deviceRepository.save(dev);
                 });
+    }
+
+    public void synch(String serialNumber) {
+        Device device = deviceRepository.getBySerialNumber(serialNumber)
+                .orElseThrow(() -> new DeviceNotFoundException(serialNumber));
+        employeeDeviceService.sendAllEmployeeDataDevice(device);
     }
 }

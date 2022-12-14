@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,6 +57,12 @@ public class DeviceResource {
     @PutMapping("/{serialNumber}")
     public ResponseEntity<?> edit(@PathVariable String serialNumber, @RequestBody Device device) {
         deviceService.edit(serialNumber, device);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{serialNumber}/synch")
+    public ResponseEntity<?> synch(@PathVariable String serialNumber) {
+        deviceService.synch(serialNumber);
         return ResponseEntity.ok().build();
     }
 }

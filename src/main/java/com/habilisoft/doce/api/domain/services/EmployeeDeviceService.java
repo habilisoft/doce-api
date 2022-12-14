@@ -11,6 +11,8 @@ import com.habilisoft.doce.api.domain.repositories.EmployeeRepository;
 import com.habilisoft.doce.api.dto.device.DeleteUser;
 import com.habilisoft.doce.api.dto.device.SendUserToAllDevices;
 import com.habilisoft.doce.api.dto.device.SendUserDataToDevice;
+import com.habilisoft.doce.api.persistence.converters.EmployeeJpaConverter;
+import com.habilisoft.doce.api.persistence.repositories.EmployeeJpaRepo;
 import com.habilisoft.doce.api.queue.SqsQueueSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,8 @@ public class EmployeeDeviceService {
     private final DeviceRepository deviceRepository;
     private final EmployeeRepository employeeRepository;
     private final SqsQueueSender queueSender;
+    private final EmployeeJpaRepo employeeJpaRepo;
+    private final EmployeeJpaConverter employeeJpaConverter;
     private final ApplicationEventPublisher eventPublisher;
 
     @TransactionalEventListener
@@ -133,5 +137,18 @@ public class EmployeeDeviceService {
         sendEmployeeDataToAllDevices(employee);
 
         return employee;
+    }
+
+    @Transactional
+    public void sendAllEmployeeDataDevice(Device device) {
+        employeeJpaRepo.streamAllBy()
+                .forEach(employee -> sendEmployeeDataToDevice(employeeJpaConverter.fromJpaEntity(employee), device));
+    }
+
+    @Transactional
+    public void sendAllEmployeeDataDevice(Device device, String tenant) {
+        TenantContext.setCurrentTenant(tenant);
+        employeeJpaRepo.streamAllBy()
+                .forEach(employee -> sendEmployeeDataToDevice(employeeJpaConverter.fromJpaEntity(employee), device));
     }
 }

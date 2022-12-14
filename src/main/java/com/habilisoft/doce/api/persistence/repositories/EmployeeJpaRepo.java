@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Created on 2019-04-22.
@@ -29,4 +30,6 @@ public interface EmployeeJpaRepo extends ExtendedRepository<EmployeeEntity, Long
     void updateEmployeesWorkShift(@Param("oldWorkShift") Long oldWorkShift, @Param("newWorkShift") Long newWorkShift);
 
     Optional<EmployeeEntity> findByDocumentNumber(@Param("documentNumber") String documentNumber);
+
+    Stream<EmployeeEntity> streamAllBy();
 }
