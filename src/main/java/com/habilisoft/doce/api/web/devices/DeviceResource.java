@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -69,6 +70,15 @@ public class DeviceResource {
     @PostMapping("/{serialNumber}/send-fp")
     public ResponseEntity<?> sendFpData(@PathVariable String serialNumber) {
         deviceService.sendFp(serialNumber);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{serialNumber}/send-fp/custom")
+    public ResponseEntity<?> sendFpData(
+            @RequestBody List<Integer> enrollIds,
+            @PathVariable String serialNumber
+    ) {
+        deviceService.sendFp(serialNumber, enrollIds);
         return ResponseEntity.ok().build();
     }
 }

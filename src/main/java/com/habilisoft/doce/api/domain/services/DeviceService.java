@@ -16,6 +16,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -121,5 +122,11 @@ public class DeviceService {
         Device device = deviceRepository.getBySerialNumber(serialNumber)
                 .orElseThrow(() -> new DeviceNotFoundException(serialNumber));
         employeeDeviceService.sendEmployeeFpDataToDevice(device);
+    }
+
+    public void sendFp(String serialNumber, List<Integer> enrollIds) {
+        Device device = deviceRepository.getBySerialNumber(serialNumber)
+                .orElseThrow(() -> new DeviceNotFoundException(serialNumber));
+        employeeDeviceService.sendEmployeeFpDataToDevice(device, enrollIds);
     }
 }

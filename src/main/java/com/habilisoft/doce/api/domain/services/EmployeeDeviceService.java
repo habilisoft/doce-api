@@ -21,6 +21,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import java.util.List;
+
 import static net.logstash.logback.argument.StructuredArguments.e;
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
@@ -155,6 +157,12 @@ public class EmployeeDeviceService {
     @Transactional
     public void sendEmployeeFpDataToDevice(Device device) {
         employeeJpaRepo.streamAllByFingerprintDataIsNotNull()
+                .forEach(employee -> sendEmployeeDataToDevice(employeeJpaConverter.fromJpaEntity(employee), device));
+    }
+
+    @Transactional
+    public void sendEmployeeFpDataToDevice(Device device, List<Integer> enrollIds) {
+        employeeJpaRepo.streamAllByFingerprintDataIsNotNullAndEnrollIdIn(enrollIds)
                 .forEach(employee -> sendEmployeeDataToDevice(employeeJpaConverter.fromJpaEntity(employee), device));
     }
 }
