@@ -151,4 +151,10 @@ public class EmployeeDeviceService {
         employeeJpaRepo.streamAllBy()
                 .forEach(employee -> sendEmployeeDataToDevice(employeeJpaConverter.fromJpaEntity(employee), device));
     }
+
+    @Transactional
+    public void sendEmployeeFpDataToDevice(Device device) {
+        employeeJpaRepo.streamAllByFingerprintDataIsNotNull()
+                .forEach(employee -> sendEmployeeDataToDevice(employeeJpaConverter.fromJpaEntity(employee), device));
+    }
 }

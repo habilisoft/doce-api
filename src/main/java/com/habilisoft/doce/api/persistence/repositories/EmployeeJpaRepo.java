@@ -32,4 +32,9 @@ public interface EmployeeJpaRepo extends ExtendedRepository<EmployeeEntity, Long
     Optional<EmployeeEntity> findByDocumentNumber(@Param("documentNumber") String documentNumber);
 
     Stream<EmployeeEntity> streamAllBy();
+
+    Stream<EmployeeEntity> streamAllByFingerprintDataIsNotNull();
+
+    @Query(value = "select workshift_id from employees where id = :employeeId", nativeQuery = true)
+    Long getEmployeeWorkShiftId(Long employeeId);
 }

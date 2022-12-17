@@ -65,4 +65,10 @@ public class DeviceResource {
         deviceService.synch(serialNumber);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{serialNumber}/send-fp")
+    public ResponseEntity<?> sendFpData(@PathVariable String serialNumber) {
+        deviceService.sendFp(serialNumber);
+        return ResponseEntity.ok().build();
+    }
 }

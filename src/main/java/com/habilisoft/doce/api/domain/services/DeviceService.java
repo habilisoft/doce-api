@@ -116,4 +116,10 @@ public class DeviceService {
                 .orElseThrow(() -> new DeviceNotFoundException(serialNumber));
         employeeDeviceService.sendAllEmployeeDataDevice(device);
     }
+
+    public void sendFp(String serialNumber) {
+        Device device = deviceRepository.getBySerialNumber(serialNumber)
+                .orElseThrow(() -> new DeviceNotFoundException(serialNumber));
+        employeeDeviceService.sendEmployeeFpDataToDevice(device);
+    }
 }
