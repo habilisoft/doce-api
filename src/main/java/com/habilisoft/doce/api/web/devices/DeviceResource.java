@@ -75,7 +75,7 @@ public class DeviceResource {
 
     @PostMapping("/{serialNumber}/send-fp/custom")
     public ResponseEntity<?> sendFpData(
-            @RequestBody List<Integer> enrollIds,
+            @RequestBody List<Long> enrollIds,
             @PathVariable String serialNumber
     ) {
         deviceService.sendFp(serialNumber, enrollIds);

@@ -35,7 +35,7 @@ public interface EmployeeJpaRepo extends ExtendedRepository<EmployeeEntity, Long
 
     Stream<EmployeeEntity> streamAllByFingerprintDataIsNotNull();
 
-    Stream<EmployeeEntity> streamAllByFingerprintDataIsNotNullAndEnrollIdIn(List<Integer> enrollIds);
+    Stream<EmployeeEntity> streamAllByFingerprintDataIsNotNullAndIdIn(List<Long> employeeIds);
 
     @Query(value = "select workshift_id from employees where id = :employeeId", nativeQuery = true)
     Long getEmployeeWorkShiftId(Long employeeId);

@@ -124,9 +124,9 @@ public class DeviceService {
         employeeDeviceService.sendEmployeeFpDataToDevice(device);
     }
 
-    public void sendFp(String serialNumber, List<Integer> enrollIds) {
+    public void sendFp(String serialNumber, List<Long> employeeIds) {
         Device device = deviceRepository.getBySerialNumber(serialNumber)
                 .orElseThrow(() -> new DeviceNotFoundException(serialNumber));
-        employeeDeviceService.sendEmployeeFpDataToDevice(device, enrollIds);
+        employeeDeviceService.sendEmployeeFpDataToDevice(device, employeeIds);
     }
 }

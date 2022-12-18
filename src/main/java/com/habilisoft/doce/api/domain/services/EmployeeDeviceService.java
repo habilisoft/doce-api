@@ -23,7 +23,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 
-import static net.logstash.logback.argument.StructuredArguments.e;
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
 /**
@@ -161,8 +160,8 @@ public class EmployeeDeviceService {
     }
 
     @Transactional
-    public void sendEmployeeFpDataToDevice(Device device, List<Integer> enrollIds) {
-        employeeJpaRepo.streamAllByFingerprintDataIsNotNullAndEnrollIdIn(enrollIds)
+    public void sendEmployeeFpDataToDevice(Device device, List<Long> enrollIds) {
+        employeeJpaRepo.streamAllByFingerprintDataIsNotNullAndIdIn(enrollIds)
                 .forEach(employee -> sendEmployeeDataToDevice(employeeJpaConverter.fromJpaEntity(employee), device));
     }
 }
