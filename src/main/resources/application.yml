@@ -47,3 +47,7 @@ cloud:
       auto: false
     region:
       static: us-east-1
+device-service:
+  url: http://localhost:7788/pub
+  username: 4WLcIYf4IGrwH8Fc
+  password: B7rEvj!spN!^3RsQ

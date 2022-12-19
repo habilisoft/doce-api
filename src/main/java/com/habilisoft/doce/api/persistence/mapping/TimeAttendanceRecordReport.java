@@ -9,9 +9,8 @@ import java.util.Date;
 @AllArgsConstructor
 public class TimeAttendanceRecordReport {
     private Long id;
-    private String firstName;
-    private String lastName;
-    private String department;
+    private String fullName;
+    private String group;
     private Date recordDate;
     private Date in;
     private Date startBreak;

@@ -7,11 +7,14 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize(converter = BaseEnumConverter.class)
 public enum PunchType implements BaseEnum {
     IN("Entrada"),
+    DUPLICATED_IN("Entrada Duplicada"),
     START_BREAK("Inicio de Descanzo"),
     END_BREAK("Fin de descanzo"),
-    OUT("Salida");
+    OUT("Salida"),
+    NOT_IN_SCHEDULE("No Programado"),
+    NO_WORK_SHIFT("No Tiene Turno Asignado");
 
-    String displayName;
+    final String displayName;
 
 
     PunchType(String displayName) {

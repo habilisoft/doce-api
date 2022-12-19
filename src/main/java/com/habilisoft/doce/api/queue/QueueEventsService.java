@@ -152,6 +152,7 @@ public class QueueEventsService {
                 .stream()
                 .filter(r -> employeeRepository.findByEnrollId(r.getEnrollId()).isPresent())
                 .map(r -> {
+                    //TODO:  Optimize, there is no need to load all employee data
                     TimeAttendanceRecord record = r.toTimeAttendanceRecord(sendLogs.getDeviceSerialNumber());
                     Employee employee = employeeRepository.findByEnrollId(r.getEnrollId()).get();
                     record.setEmployee(employee);

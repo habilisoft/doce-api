@@ -31,7 +31,7 @@ public class LogRecord {
     private EventType event;
 
     private TimeAttendanceRecord toTimeAttendanceRecord(){
-        TimeAttendanceRecord record = new TimeAttendanceRecord();
+        TimeAttendanceRecord record = TimeAttendanceRecord.builder().build();
         BeanUtils.copyProperties(this, record);
         return record;
     }

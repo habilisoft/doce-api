@@ -11,14 +11,20 @@ import com.google.gson.GsonBuilder;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
+import org.springframework.http.client.support.BasicAuthorizationInterceptor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -95,5 +101,18 @@ public class ApiApplication {
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setCacheSeconds(2);
         return messageSource;
+    }
+
+    @Bean
+    public RestTemplate deviceServiceRestTemplate(
+            @Value("${device-service.url}") String url,
+            @Value("${device-service.username}") String username,
+            @Value("${device-service.password}") String password
+            ) {
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(url));
+        restTemplate.getInterceptors().add(
+                new BasicAuthenticationInterceptor(username, password));
+        return restTemplate;
     }
 }

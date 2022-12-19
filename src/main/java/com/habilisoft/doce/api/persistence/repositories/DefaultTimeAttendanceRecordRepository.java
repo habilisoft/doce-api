@@ -27,8 +27,8 @@ public class DefaultTimeAttendanceRecordRepository implements TimeAttendanceReco
     }
 
     @Override
-    public Page<TimeAttendanceRecord> findEmployeeEntries(Long id, Date date, String serialNumber, Pageable pageable) {
-        Page<TimeAttendanceRecordEntity> entityPage = jpaRepo.findEmployeeEntries(id, date, serialNumber, pageable);
+    public Page<TimeAttendanceRecord> findEmployeeEntries(Long id, Date date, Pageable pageable) {
+        Page<TimeAttendanceRecordEntity> entityPage = jpaRepo.findEmployeeEntries(id, date, pageable);
         return entityPage.map(converter::fromJpaEntity);
     }
 
@@ -44,5 +44,12 @@ public class DefaultTimeAttendanceRecordRepository implements TimeAttendanceReco
         return entityList.stream()
                 .map(converter::fromJpaEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public TimeAttendanceRecord save(TimeAttendanceRecord record) {
+        TimeAttendanceRecordEntity entity = converter.toJpaEntity(record);
+        jpaRepo.save(entity);
+        return converter.fromJpaEntity(entity);
     }
 }

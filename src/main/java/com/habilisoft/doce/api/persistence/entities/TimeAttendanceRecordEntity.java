@@ -11,7 +11,10 @@ import com.habilisoft.doce.api.persistence.mapping.EmployeesWorkHourReport;
 import com.habilisoft.doce.api.persistence.mapping.TimeAttendanceRecordReport;
 import com.habilisoft.doce.api.persistence.mapping.TimeAttendanceSummaryReport;
 import com.habilisoft.doce.api.persistence.mapping.TimeAttendanceSummaryReportDetail;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.ColumnResult;
@@ -42,7 +45,9 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "time_attendance_records")
-
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @NamedNativeQueries(
         {
                 @NamedNativeQuery(
@@ -51,22 +56,20 @@ import java.util.Date;
                                 "from\n" +
                                 "    time_attendance_records t\n" +
                                 "    inner JOIN employees e on (e.id = t.employee_id)\n" +
-                                "    inner join departments d on (d.id = e.department_id)\n" +
+                                "    inner join groups d on (d.id = e.group_id)\n" +
                                 "    \n" +
                                 "WHERE\n" +
                                 "    t.record_date between :recordDateStart and :recordDateEnd\n" +
                                 "    and (:employeeId = 0 or e.id = :employeeId)\n" +
-                                "    and (:departmentId = 0 or d.id = :departmentId)\n" +
-                                "    and e.location_type = 'FIXED'",
+                                "    and (:groupId = 0 or d.id = :groupId)\n" ,
                         resultSetMapping = "SqlResultSetMapping.count"
                 ),
                 @NamedNativeQuery(
                         name = "TimeAttendanceRecord.timeAttendanceReport",
                         query = "SELECT\n" +
                                 "    e.id,\n" +
-                                "    e.first_name,\n" +
-                                "    e.last_name,\n" +
-                                "    d.\"name\" as department,\n" +
+                                "    e.full_name,\n" +
+                                "    d.\"name\" as group_name,\n" +
                                 "    t.record_date,\n" +
                                 "    min(cast(t.time as time)) filter(where t.punch_type = 'IN') as in,\n" +
                                 "    min(cast(t.time as time)) filter (where t.punch_type = 'START_BREAK') as start_break,\n" +
@@ -75,14 +78,13 @@ import java.util.Date;
                                 "from\n" +
                                 "    time_attendance_records t\n" +
                                 "    inner JOIN employees e on (e.id = t.employee_id)\n" +
-                                "    inner join departments d on (d.id = e.department_id)\n" +
+                                "    inner join groups d on (d.id = e.group_id)\n" +
                                 "    \n" +
                                 "WHERE\n" +
                                 "    t.record_date between :recordDateStart and :recordDateEnd\n" +
                                 "    and (:employeeId = 0 or e.id = :employeeId)\n" +
-                                "    and (:departmentId = 0 or d.id = :departmentId)\n" +
-                                "    and e.location_type = 'FIXED'\n" +
-                                "group by e.id, first_name, last_name, department, record_date",
+                                "    and (:groupId = 0 or d.id = :groupId)\n" +
+                                "group by e.id, full_name, group_name, record_date",
                         resultSetMapping = "timeAttendanceReportResultsMapping"
                 ),
                 @NamedNativeQuery(
@@ -121,8 +123,6 @@ import java.util.Date;
                                 "        GROUP BY\n" +
                                 "            employee_id\n" +
                                 "    ) t ON TRUE\n" +
-                                "WHERE\n" +
-                                "   e.location_type = 'FIXED'\n" +
                                 "group by d.record_date",
                         resultSetMapping = "timeAttendanceSummaryResultsMapping"
                 ),
@@ -156,9 +156,7 @@ import java.util.Date;
                                 "        GROUP BY\n" +
                                 "            employee_id\n" +
                                 "    ) t ON TRUE\n" +
-                                "WHERE\n" +
-                                "    e.location_type = 'FIXED'\n" +
-                                "    and case\n" +
+                                "WHERE case\n" +
                                 "            when 0=:typeId then t.time BETWEEN wd.start_time - cast('15 minutes' AS INTERVAL) AND wd.start_time + cast('15 minutes' AS INTERVAL)\n" +
                                 "            when 1=:typeId then t.time > wd.start_time + cast('15 minutes' AS INTERVAL)\n" +
                                 "            when 2=:typeId then t.time IS NULL\n" +
@@ -170,9 +168,8 @@ import java.util.Date;
                         query = "SELECT\n" +
                                 "    d.record_date,\n" +
                                 "    e.id,\n" +
-                                "    e.first_name,\n" +
-                                "    e.last_name,\n" +
-                                "    de.name as department,\n" +
+                                "    e.full_name,\n" +
+                                "    de.name as group_name,\n" +
                                 "    t.time,\n" +
                                 "    wd.start_time \n" +
                                 "FROM\n" +
@@ -188,7 +185,7 @@ import java.util.Date;
                                 "           end\n" +
                                 ")\n" +
                                 "    INNER JOIN employees e ON (e.id = w.employee_id)\n" +
-                                "    INNER  JOIN departments de on (de.id = e.department_id)\n" +
+                                "    INNER  JOIN groups de on (de.id = e.group_id)\n" +
                                 "    LEFT JOIN LATERAL \n" +
                                 "    (\n" +
                                 "        SELECT\n" +
@@ -202,9 +199,7 @@ import java.util.Date;
                                 "        GROUP BY\n" +
                                 "            employee_id\n" +
                                 "    ) t ON TRUE\n" +
-                                "WHERE\n" +
-                                "    e.location_type = 'FIXED'\n" +
-                                "    and case\n" +
+                                "WHERE case\n" +
                                 "            when 0=:typeId then t.time BETWEEN wd.start_time - cast('15 minutes' AS INTERVAL) AND wd.start_time + cast('15 minutes' AS INTERVAL)\n" +
                                 "            when 1=:typeId then t.time > wd.start_time + cast('15 minutes' AS INTERVAL)\n" +
                                 "            when 2=:typeId then t.time IS NULL\n" +
@@ -234,10 +229,9 @@ import java.util.Date;
                                 "                       ) rdate,\n" +
                                 "        employees e\n" +
                                 " WHERE\n" +
-                                "        (:departmentId = 0 or e.department_id = :departmentId)\n" +
+                                "        (:groupId = 0 or e.group_id = :groupId)\n" +
                                 "        and (:locationId = 0 or e.location_id = :locationId)\n" +
                                 "        and (:employeeId = 0 or e.id = :employeeId)\n" +
-                                "        and e.location_type = 'FIXED'\n" +
                                 "),\n" +
                                 "\n" +
                                 "time_attendance as (\n" +
@@ -351,7 +345,7 @@ import java.util.Date;
                                 "         employees e\n" +
                                 "     WHERE\n" +
                                 "         e.location_type = 'AMBULATORY'\n" +
-                                "         and (:departmentId = 0 or e.department_id = :departmentId)\n" +
+                                "         and (:groupId = 0 or e.group_id = :groupId)\n" +
                                 "         and (:employeeId = 0 or e.id = :employeeId)\n" +
                                 ")\n" +
                                 "\n" +
@@ -418,9 +412,8 @@ import java.util.Date;
                                 targetClass = TimeAttendanceRecordReport.class,
                                 columns = {
                                         @ColumnResult(name = "id", type = Long.class),
-                                        @ColumnResult(name = "first_name", type = String.class),
-                                        @ColumnResult(name = "last_name", type = String.class),
-                                        @ColumnResult(name = "department", type = String.class),
+                                        @ColumnResult(name = "full_name", type = String.class),
+                                        @ColumnResult(name = "group_name", type = String.class),
                                         @ColumnResult(name = "record_date", type = Date.class),
                                         @ColumnResult(name = "in", type = Date.class),
                                         @ColumnResult(name = "start_break", type = Date.class),
@@ -470,9 +463,8 @@ import java.util.Date;
                                 columns = {
                                         @ColumnResult(name = "record_date", type = Date.class),
                                         @ColumnResult(name = "id", type = Long.class),
-                                        @ColumnResult(name = "first_name", type = String.class),
-                                        @ColumnResult(name = "last_name", type = String.class),
-                                        @ColumnResult(name = "department", type = String.class),
+                                        @ColumnResult(name = "full_name", type = String.class),
+                                        @ColumnResult(name = "group_name", type = String.class),
                                         @ColumnResult(name = "time", type = Date.class),
                                         @ColumnResult(name = "start_time", type = Date.class)
 
@@ -550,17 +542,26 @@ public class TimeAttendanceRecordEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PunchType punchType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "device_serial_number")
     private DeviceEntity device;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "employee_id")
     private EmployeeEntity employee;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "work_shift_id")
     private WorkShiftEntity workShift;
+
+    @Column(name = "is_early")
+    private Boolean isEarly;
+
+    @Column(name = "is_late")
+    private Boolean isLate;
+
+    @Column(name = "difference_in_seconds")
+    private Long differenceInSeconds;
 
     @PrePersist
     private void prePersist() {

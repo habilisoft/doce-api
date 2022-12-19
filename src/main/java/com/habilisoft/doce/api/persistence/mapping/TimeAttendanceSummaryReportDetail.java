@@ -10,9 +10,8 @@ import java.util.Date;
 public class TimeAttendanceSummaryReportDetail {
     private Date recordDate;
     private Long id;
-    private String firstName;
-    private String lastName;
-    private String department;
+    private String fullName;
+    private String group;
     private Date time;
     private Date startTime;
 }

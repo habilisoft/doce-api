@@ -1,5 +1,6 @@
 package com.habilisoft.doce.api.persistence.repositories;
 
+import com.habilisoft.doce.api.auth.base.repositories.ExtendedRepository;
 import com.habilisoft.doce.api.persistence.entities.TimeAttendanceRecordEntity;
 import com.habilisoft.doce.api.persistence.mapping.AmbulatoryAssistanceDetailReport;
 import com.habilisoft.doce.api.persistence.mapping.AmbulatoryAssistanceSummaryReport;
@@ -19,19 +20,18 @@ import java.util.List;
 /**
  * Created on 8/21/22.
  */
-public interface TimeAttendanceRecordJpaRepository extends JpaRepository<TimeAttendanceRecordEntity, Long> {
+public interface TimeAttendanceRecordJpaRepository extends ExtendedRepository<TimeAttendanceRecordEntity, Long> {
     @Query("SELECT t from TimeAttendanceRecordEntity t inner join t.employee e " +
             "where e.id = :employeeId and t.recordDate = :recordDate " +
-            "and t.device.serialNumber = :serialNumber order by t.time desc")
+            " order by t.time desc")
     Page<TimeAttendanceRecordEntity> findEmployeeEntries(@Param("employeeId") Long employeeId,
                                                    @Param("recordDate") Date recordDate,
-                                                   @Param("serialNumber") String serialNumber,
                                                    Pageable pageable);
 
     @Query(name = "TimeAttendanceRecord.timeAttendanceReport", nativeQuery = true)
     Page<TimeAttendanceRecordReport> getTimeAttendanceReport(@Param("recordDateStart") Date recordDateStart,
                                                              @Param("recordDateEnd") Date recordDateEnd,
-                                                             @Param("departmentId") Long departmentId,
+                                                             @Param("groupId") Long groupId,
                                                              @Param("employeeId") Long employeeId,
                                                              Pageable pageable);
 
@@ -47,7 +47,7 @@ public interface TimeAttendanceRecordJpaRepository extends JpaRepository<TimeAtt
     List<EmployeesWorkHourReport> findEmployeeWorkHoursByRange(@Param("filterType") String filterType,
                                                                @Param("filterDate") Date filterDate,
                                                                @Param("filterDateEnd") Date filterDateEnd,
-                                                               @Param("departmentId") Long departmentId,
+                                                               @Param("groupId") Long groupId,
                                                                @Param("locationId") Long locationId,
                                                                @Param("employeeId") Long employeeId);
 
@@ -60,7 +60,7 @@ public interface TimeAttendanceRecordJpaRepository extends JpaRepository<TimeAtt
     List<AmbulatoryAssistanceSummaryReport> findAmbulatoryEmployeeAssistanceByRange(@Param("filterType") String filterType,
                                                                                     @Param("filterDate") Date filterDate,
                                                                                     @Param("filterDateEnd") Date filterDateEnd,
-                                                                                    @Param("departmentId") Long departmentId,
+                                                                                    @Param("groupId") Long groupId,
                                                                                     @Param("employeeId") Long employeeId);
 
 

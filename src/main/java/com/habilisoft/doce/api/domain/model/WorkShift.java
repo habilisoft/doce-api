@@ -19,7 +19,7 @@ public class WorkShift {
     private Long id;
     private String name;
     private Float weekWorkHours;
-    private Integer lateGracePeriod;
+    private Long lateGracePeriod;
     private Boolean punchForBreak;
     private Integer breakMinutes;
     private Set<WorkShiftDetail> details;

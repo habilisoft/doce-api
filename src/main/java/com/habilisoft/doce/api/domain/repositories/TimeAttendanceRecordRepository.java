@@ -11,7 +11,9 @@ import java.util.List;
  * Created on 8/21/22.
  */
 public interface TimeAttendanceRecordRepository {
-    Page<TimeAttendanceRecord> findEmployeeEntries(Long id, Date date, String serialNumber, Pageable pageable);
+    Page<TimeAttendanceRecord> findEmployeeEntries(Long id, Date date, Pageable pageable);
 
     List<TimeAttendanceRecord> saveAll(List<TimeAttendanceRecord> data);
+
+    TimeAttendanceRecord save(TimeAttendanceRecord record);
 }
