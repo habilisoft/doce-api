@@ -1,5 +1,6 @@
 package com.habilisoft.doce.api.web.users.resources;
 
+import com.habilisoft.doce.api.auth.dto.CreateUserRequest;
 import com.habilisoft.doce.api.auth.model.User;
 import com.habilisoft.doce.api.auth.services.UserService;
 import com.habilisoft.doce.api.config.StartupHousekeeper;
@@ -46,6 +47,12 @@ public class UserResource {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changePassword(@RequestBody ChangePasswordRequest request) {
         userService.changePassword(request.getOldPassword(), request.getNewPassword());
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void createUser(@RequestBody CreateUserRequest request) {
+        userService.createUser(request);
     }
 
     @GetMapping("/default-user")
