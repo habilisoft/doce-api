@@ -31,3 +31,5 @@ databaseChangeLog:
     file: classpath:/migrations/tenant/12-add-columns-to-time-record-nd-workshift.sql
 - include:
     file: classpath:/migrations/tenant/13-add-company-info-table.sql
+- include:
+    file: classpath:/migrations/tenant/14-add-employee-data-in-device.sql

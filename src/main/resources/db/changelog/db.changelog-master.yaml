@@ -9,3 +9,5 @@ databaseChangeLog:
     file: classpath:/migrations/public/2-create-user-sequence.sql
 - include:
     file: classpath:/migrations/public/3-drop-not-null-client-device.sql
+- include:
+    file: classpath:/migrations/public/4-add-employee-data-in-device.sql
