@@ -87,6 +87,15 @@ public class TimeAttendanceRecordService {
         record.setWorkShift(workShift);
         Date currentPunchTime = record.getTime();
         WorkShiftDetail schedule = getCurrentDaySchedule(workShift, currentPunchTime);
+        if(schedule == null) {
+            log.info(
+                    "Employee's work shift doesn't have schedule for the current day {}",
+                    kv("employee", employee)
+            );
+            record.setPunchType(PunchType.NOT_IN_SCHEDULE);
+            repository.save(record);
+            return;
+        }
 
         if (workShift.getPunchPolicy().getType() == PunchPolicyType.IN_TIME_RANGE) {
             processTimeRangePolicy(record, workShift, currentPunchTime, schedule);
@@ -118,16 +127,6 @@ public class TimeAttendanceRecordService {
     }
     private void processLastPunchIsOutPolicy(TimeAttendanceRecord record, Employee employee, WorkShift workShift, Date currentPunchTime, WorkShiftDetail schedule) {
         Long lateGracePeriod = workShift.getLateGracePeriod();
-
-        if(schedule == null) {
-            log.info(
-                    "Employee's work shift doesn't have schedule for the current day {}",
-                    kv("employee", employee)
-            );
-            record.setPunchType(PunchType.NOT_IN_SCHEDULE);
-            repository.save(record);
-            return;
-        }
 
         //Get previous punch
         final TimeAttendanceRecord lastPunch = getLastPunchFromCurrentSchedule(employee, schedule, currentPunchTime);
