@@ -1,6 +1,6 @@
 package com.habilisoft.doce.api.persistence.entities.reports;
 
-import com.habilisoft.doce.api.domain.model.PunchType;
+import com.habilisoft.doce.api.domain.model.punch.PunchType;
 import com.habilisoft.doce.api.dto.device.EventType;
 import com.habilisoft.doce.api.dto.device.InOut;
 import com.habilisoft.doce.api.dto.device.LogRecordMode;

@@ -2,6 +2,7 @@ package com.habilisoft.doce.api.web.data;
 
 import com.habilisoft.doce.api.domain.model.Report;
 import com.habilisoft.doce.api.domain.model.WorkShiftDay;
+import com.habilisoft.doce.api.domain.model.punch.policy.PunchPolicyType;
 import com.habilisoft.doce.api.persistence.entities.CompanyInfoEntity;
 import com.habilisoft.doce.api.persistence.repositories.CompanyInfoJpaRepo;
 import com.habilisoft.doce.api.serialization.BaseEnumConverter;
@@ -35,6 +36,7 @@ public class DataResource {
         Data data = Data.builder()
                 .days(WorkShiftDay.values())
                 .reports(Report.values())
+                .punchPolicyTypes(PunchPolicyType.values())
                 .companyInfo(
                         Map.of("name", Optional.ofNullable(companyInfo.getName()).orElse("Compañia"))
                 )
@@ -49,6 +51,8 @@ public class DataResource {
         WorkShiftDay[] days;
         @JsonSerialize(contentConverter = BaseEnumConverter.class)
         Report[] reports;
+        @JsonSerialize(contentConverter = BaseEnumConverter.class)
+        PunchPolicyType[] punchPolicyTypes;
 
         Map<String, String> companyInfo;
     }

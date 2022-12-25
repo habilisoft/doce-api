@@ -1,4 +1,4 @@
-package com.habilisoft.doce.api.domain.model;
+package com.habilisoft.doce.api.domain.model.punch;
 
 import com.habilisoft.doce.api.serialization.BaseEnum;
 import com.habilisoft.doce.api.serialization.BaseEnumConverter;

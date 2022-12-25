@@ -201,6 +201,6 @@ public class TimeAttendanceRecordResource extends BaseResource<TimeAttendanceRec
 
     @Override
     public String[] getSortableFields() {
-        return new String[]{"recordDate", "time", "employee.id"};
+        return new String[]{"lastModifiedDate","recordDate", "time", "employee.id"};
     }
 }

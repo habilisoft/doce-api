@@ -3,7 +3,12 @@ package com.habilisoft.doce.api.domain.services;
 import com.habilisoft.doce.api.domain.exceptions.WorkShiftWithoutDetailsException;
 import com.habilisoft.doce.api.domain.model.WorkShift;
 import com.habilisoft.doce.api.domain.model.WorkShiftDetail;
+import com.habilisoft.doce.api.domain.model.punch.policy.LastPunchIsOutPunchPolicy;
+import com.habilisoft.doce.api.domain.model.punch.policy.PunchPolicy;
+import com.habilisoft.doce.api.domain.model.punch.policy.PunchPolicyType;
+import com.habilisoft.doce.api.domain.model.punch.policy.TimeRangePunchPolicy;
 import com.habilisoft.doce.api.domain.repositories.WorkShiftRepository;
+import com.habilisoft.doce.api.persistence.converters.PunchPolicyConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class WorkShiftService {
     private final WorkShiftRepository repository;
+    private final PunchPolicyConverter policyConverter;
 
     public WorkShift save(WorkShift workShift) {
         workShift.setDetails(
@@ -27,6 +33,7 @@ public class WorkShiftService {
                         .filter(WorkShiftDetail::getSelected)
                         .collect(Collectors.toSet()));
         workShift.setWeekWorkHours(this.getWeekWorkHours(workShift));
+        workShift.setPunchPolicy(policyConverter.getPunchPolicy(workShift.getPunchPolicyData()));
         return repository.save(workShift);
     }
 
@@ -38,7 +45,7 @@ public class WorkShiftService {
                         .filter(WorkShiftDetail::getSelected)
                         .collect(Collectors.toSet()));
         workShift.setWeekWorkHours(getWeekWorkHours(workShift));
-
+        workShift.setPunchPolicy(policyConverter.getPunchPolicy(workShift.getPunchPolicyData()));
         return repository.save(workShift);
     }
 

@@ -86,9 +86,15 @@ public class DateUtils {
     }
 
     public static String secondsToSecondsMinutesAndHours(Long totalSecs) {
+        String symbol = totalSecs < 0 ? "-" : "";
+        totalSecs = Math.abs(totalSecs);
         Long hours = totalSecs / 3600;
         Long minutes = (totalSecs % 3600) / 60;
         Long seconds = totalSecs % 60;
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        return String.format("%s%02d:%02d:%02d", symbol, hours, minutes, seconds);
+    }
+
+    public static Boolean isWithinRange(LocalTime start, LocalTime end, LocalTime givenTime) {
+        return givenTime.isAfter(start) && givenTime.isBefore(end);
     }
 }

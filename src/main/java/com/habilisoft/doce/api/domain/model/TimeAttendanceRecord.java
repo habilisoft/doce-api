@@ -1,5 +1,6 @@
 package com.habilisoft.doce.api.domain.model;
 
+import com.habilisoft.doce.api.domain.model.punch.PunchType;
 import com.habilisoft.doce.api.dto.device.EventType;
 import com.habilisoft.doce.api.dto.device.InOut;
 import com.habilisoft.doce.api.dto.device.LogRecordMode;
@@ -21,7 +22,7 @@ public class TimeAttendanceRecord {
     private Device device;
     private Employee employee;
     private WorkShift workShift;
-    private Boolean isEarly;
-    private Boolean isLate;
+    private Boolean isEarlyDeparture;
+    private Boolean isLateArrival;
     private Long differenceInSeconds;
 }

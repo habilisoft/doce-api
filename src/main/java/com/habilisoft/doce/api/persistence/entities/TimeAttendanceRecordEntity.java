@@ -1,6 +1,6 @@
 package com.habilisoft.doce.api.persistence.entities;
 
-import com.habilisoft.doce.api.domain.model.PunchType;
+import com.habilisoft.doce.api.domain.model.punch.PunchType;
 import com.habilisoft.doce.api.dto.device.EventType;
 import com.habilisoft.doce.api.dto.device.InOut;
 import com.habilisoft.doce.api.dto.device.LogRecordMode;
@@ -555,10 +555,10 @@ public class TimeAttendanceRecordEntity extends BaseEntity {
     private WorkShiftEntity workShift;
 
     @Column(name = "is_early")
-    private Boolean isEarly;
+    private Boolean isEarlyDeparture;
 
     @Column(name = "is_late")
-    private Boolean isLate;
+    private Boolean isLateArrival;
 
     @Column(name = "difference_in_seconds")
     private Long differenceInSeconds;

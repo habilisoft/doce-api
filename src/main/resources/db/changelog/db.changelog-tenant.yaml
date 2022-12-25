@@ -33,3 +33,5 @@ databaseChangeLog:
     file: classpath:/migrations/tenant/13-add-company-info-table.sql
 - include:
     file: classpath:/migrations/tenant/14-add-employee-data-in-device.sql
+- include:
+    file: classpath:/migrations/tenant/15-add-punch-policy-columns.sql

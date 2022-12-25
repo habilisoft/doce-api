@@ -1,8 +1,13 @@
 package com.habilisoft.doce.api.persistence.entities;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.habilisoft.doce.api.auth.base.converters.CustomJsonTimeSerializerWithoutTimeZone;
 import com.habilisoft.doce.api.domain.model.WorkShiftDetail;
+import com.habilisoft.doce.api.domain.model.punch.PunchType;
+import com.habilisoft.doce.api.domain.model.punch.policy.PunchPolicyType;
 import com.habilisoft.doce.api.persistence.BaseEntity;
+import com.habilisoft.doce.api.persistence.converters.PunchPolicyMetadataSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +20,8 @@ import org.hibernate.annotations.Where;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -23,6 +30,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,6 +67,14 @@ public class WorkShiftEntity extends BaseEntity {
 
     @Column
     private Integer breakMinutes;
+
+    @Type(type = "jsonb")
+    @Column(name = "punch_policy_meta_data", columnDefinition = "jsonb")
+    private LinkedHashMap<String, Object> punchPolicyMetaData;
+
+    @Column(name = "punch_policy_type")
+    @Enumerated(EnumType.STRING)
+    private PunchPolicyType punchPolicyType;
 
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "workShift", fetch = FetchType.EAGER)

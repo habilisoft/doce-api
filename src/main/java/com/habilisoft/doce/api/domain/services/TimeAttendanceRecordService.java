@@ -5,10 +5,12 @@ import com.habilisoft.doce.api.domain.model.Employee;
 import com.habilisoft.doce.api.domain.model.TimeAttendanceRecord;
 import com.habilisoft.doce.api.domain.model.WorkShift;
 import com.habilisoft.doce.api.domain.model.WorkShiftDetail;
+import com.habilisoft.doce.api.domain.model.punch.policy.PunchPolicyType;
+import com.habilisoft.doce.api.domain.model.punch.policy.TimeRangePunchPolicy;
 import com.habilisoft.doce.api.domain.repositories.EmployeeRepository;
 import com.habilisoft.doce.api.domain.repositories.TimeAttendanceRecordRepository;
 import com.habilisoft.doce.api.domain.util.DateUtil;
-import com.habilisoft.doce.api.domain.model.PunchType;
+import com.habilisoft.doce.api.domain.model.punch.PunchType;
 import com.habilisoft.doce.api.persistence.mapping.AmbulatoryAssistanceDetailReport;
 import com.habilisoft.doce.api.persistence.mapping.EmployeesWorkHourReport;
 import com.habilisoft.doce.api.persistence.mapping.TimeAttendanceRecordReport;
@@ -70,6 +72,7 @@ public class TimeAttendanceRecordService {
                 .findFirst()
                 .orElse(null);
     }
+
     private void updateRecord(final TimeAttendanceRecord record) {
         final Employee employee = employeeRepository
                 .findById(record.getEmployee().getId())
@@ -84,6 +87,36 @@ public class TimeAttendanceRecordService {
         record.setWorkShift(workShift);
         Date currentPunchTime = record.getTime();
         WorkShiftDetail schedule = getCurrentDaySchedule(workShift, currentPunchTime);
+
+        if (workShift.getPunchPolicy().getType() == PunchPolicyType.IN_TIME_RANGE) {
+            processTimeRangePolicy(record, workShift, currentPunchTime, schedule);
+        } else {
+            processLastPunchIsOutPolicy(record, employee, workShift, currentPunchTime, schedule);
+        }
+    }
+
+    private void processTimeRangePolicy(TimeAttendanceRecord record, WorkShift workShift, Date currentPunchTime, WorkShiftDetail schedule) {
+        Long lateGracePeriod = workShift.getLateGracePeriod();
+        TimeRangePunchPolicy policy = (TimeRangePunchPolicy) workShift.getPunchPolicy();
+        LocalTime punchTime = DateUtils.getTime(currentPunchTime);
+
+        if(DateUtils.isWithinRange(policy.getInStart(), policy.getInEnd(), punchTime)) {
+            record.setPunchType(PunchType.IN);
+        } else {
+            record.setPunchType(PunchType.OUT);
+        }
+
+        if(record.getPunchType() == PunchType.OUT) {
+            record.setDifferenceInSeconds(getDifferenceInSeconds(currentPunchTime, schedule.getEndTime()));
+            record.setIsEarlyDeparture(isEarlyDeparture(record.getDifferenceInSeconds(), lateGracePeriod));
+        } else {
+            record.setDifferenceInSeconds(getDifferenceInSeconds(currentPunchTime, schedule.getStartTime()));
+            record.setIsLateArrival(isLateArrival(record.getDifferenceInSeconds(), lateGracePeriod));
+        }
+        repository.save(record);
+
+    }
+    private void processLastPunchIsOutPolicy(TimeAttendanceRecord record, Employee employee, WorkShift workShift, Date currentPunchTime, WorkShiftDetail schedule) {
         Long lateGracePeriod = workShift.getLateGracePeriod();
 
         if(schedule == null) {
@@ -102,7 +135,7 @@ public class TimeAttendanceRecordService {
         if(lastPunch == null) {
             record.setPunchType(PunchType.IN);
             record.setDifferenceInSeconds(getDifferenceInSeconds(currentPunchTime, schedule.getStartTime()));
-            record.setIsLate(isLateArrival(record.getDifferenceInSeconds(), lateGracePeriod));
+            record.setIsLateArrival(isLateArrival(record.getDifferenceInSeconds(), lateGracePeriod));
             repository.save(record);
         } else {
             if(PunchType.IN.equals(lastPunch.getPunchType())) {
@@ -110,23 +143,22 @@ public class TimeAttendanceRecordService {
                 if(differenceBetweenCurrentAndPreviousPunch > CONSIDERED_CONSECUTIVE_MINUTES) {
                     record.setPunchType(PunchType.OUT);
                     record.setDifferenceInSeconds(getDifferenceInSeconds(currentPunchTime, schedule.getEndTime()));
-                    record.setIsEarly(isEarlyDeparture(record.getDifferenceInSeconds(), lateGracePeriod));
+                    record.setIsEarlyDeparture(isEarlyDeparture(record.getDifferenceInSeconds(), lateGracePeriod));
                     repository.save(record);
                 }
             } else if (PunchType.OUT.equals(lastPunch.getPunchType())) {
                 lastPunch.setTime(currentPunchTime);
                 lastPunch.setRecordDate(record.getTime());
                 lastPunch.setDifferenceInSeconds(getDifferenceInSeconds(currentPunchTime, schedule.getEndTime()));
-                lastPunch.setIsEarly(isEarlyDeparture(lastPunch.getDifferenceInSeconds(), lateGracePeriod));
+                lastPunch.setIsEarlyDeparture(isEarlyDeparture(lastPunch.getDifferenceInSeconds(), lateGracePeriod));
                 repository.save(lastPunch);
             }
         }
-
     }
 
     public boolean isEarlyDeparture(Long differenceInSeconds, Long lateGracePeriod) {
         Long minutes = DateUtils.secondsToMinutes(differenceInSeconds);
-        return minutes < lateGracePeriod;
+        return (minutes + lateGracePeriod) < 0;
     }
 
     public boolean isLateArrival(Long differenceInSeconds, Long lateGracePeriod) {

@@ -10,12 +10,8 @@ import java.time.format.DateTimeFormatter;
 
 
 public class CustomJsonTimeDeserializerWithoutTimeZone extends JsonDeserializer<LocalTime> {
-
     @Override
     public LocalTime deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-
         return LocalTime.parse(jp.getValueAsString(), DateTimeFormatter.ofPattern("H:mm"));
-
     }
-
 }
