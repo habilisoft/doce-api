@@ -261,39 +261,5 @@ public class TimeAttendanceRecordService {
         return jpaRepository.findEmployeeWorkHoursDetails(employeeId, recordDate, pageable);
     }
 
-    /*public List<Map> getAmbulatoryEmployeeAssistanceByRange(final Map<String, Object> queryMap) throws ParseException {
-
-        final String filterType = queryMap.containsKey("filterType") ? queryMap.get("filterType").toString() : "week";
-        final Date filterDate = queryMap.containsKey("filterDate") ? DateUtil.parse(queryMap.get("filterDate").toString()) : new Date();
-        final Date filterDateEnd = queryMap.containsKey("filterDateEnd") ? DateUtil.parse(queryMap.get("filterDateEnd").toString()) : new Date();
-        final Long groupId = queryMap.containsKey("groupId") ? Long.valueOf(queryMap.get("groupId").toString()) : 0l;
-        final Long employeeId = queryMap.containsKey("employeeId") ? Long.valueOf(queryMap.get("employeeId").toString()) : 0l;
-
-        Map<Map, List<AmbulatoryAssistanceSummaryReport>> employeesMap = this.repository
-                .findAmbulatoryEmployeeAssistanceByRange(filterType, filterDate, filterDateEnd, groupId, employeeId)
-                .stream()
-                .collect(groupingBy(r -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("id", r.getId());
-                    map.put("name", r.getName());
-                    return map;
-                }));
-
-        return employeesMap.entrySet()
-                .stream()
-                .map(e -> {
-                    Map<String, Object> mappedMap = e.getKey();
-                    mappedMap.put("visits", e.getValue());
-                    return mappedMap;
-                })
-                .collect(Collectors.toList());
-    }
-
-    public Page<AmbulatoryAssistanceDetailReport> getAmbulatoryEmployeeAssistanceDetails(final Long employeeId,
-                                                                                         final Date recordDate,
-                                                                                         final Pageable pageable) {
-
-        return this.repository.findAmbulatoryEmployeeAssistanceDetails(employeeId, recordDate, pageable);
-    }*/
 
 }

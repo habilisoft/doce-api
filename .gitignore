@@ -33,3 +33,4 @@ build/
 .vscode/
 logs
 liquibase-diff-changeLog.postgresql.sql
+application-prod-local.yml
