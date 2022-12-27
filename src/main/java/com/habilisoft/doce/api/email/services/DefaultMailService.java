@@ -3,8 +3,6 @@ package com.habilisoft.doce.api.email.services;
 import com.habilisoft.doce.api.email.models.Attachment;
 import com.habilisoft.doce.api.email.models.EmailRequest;
 import com.habilisoft.doce.api.email.models.PlainTextEmailRequest;
-import com.habilisoft.doce.api.email.models.TemplateSource;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -55,11 +53,12 @@ public class DefaultMailService implements MailService {
                 message.setCc(request.getCco().toArray(new String[0]));
             }
 
-            String subject = getSubject(request.getSubject());
+            String subject = request.getSubject();
 
             message.setSubject(subject);
             message.setSentDate(new Date());
             message.setText(text, true);
+            message.setFrom("Reportes de Asistencia <reportes@doce.do>");
 
             if(!CollectionUtils.isEmpty(request.getAttachments())){
                 for (Attachment attachment : request.getAttachments()) {
@@ -72,17 +71,6 @@ public class DefaultMailService implements MailService {
         };
 
         mailSender.send(preparator);
-    }
-
-
-    private String getSubject(String subject) {
-
-        String env = environment.getActiveProfiles()[0];
-        if("prod".equals(env)) {
-            return subject;
-        }
-
-        return String.format("%s - %s", subject, StringUtils.capitalize(env));
     }
 
 }

@@ -40,6 +40,18 @@ public class DateUtils {
         return ldt.atZone(ZoneId.of(timezone));
     }
 
+    public static String getCurrentDateStringTimezone(String timezone){
+        LocalDateTime ldt = LocalDateTime.now(ZoneId.of(timezone));
+        return ldt.atZone(ZoneId.of(timezone))
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    }
+
+    public static String monthNameDayAndYear(String timezone, Locale locale){
+        LocalDateTime ldt = LocalDateTime.now(ZoneId.of(timezone));
+        return ldt.atZone(ZoneId.of(timezone))
+                .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy", locale));
+    }
+
     public static LocalTime getTime(Date date) {
         return LocalDateTime.ofInstant(date.toInstant(),
                 ZoneId.systemDefault()).toLocalTime();

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.habilisoft.doce.api.domain.model.Group;
 import com.habilisoft.doce.api.domain.model.Report;
 import com.habilisoft.doce.api.serialization.BaseEnumConverter;
+import com.habilisoft.doce.api.utils.export.enums.ExportType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,5 +26,8 @@ public class ScheduledReport {
     private Report report;
     private List<String> recipients;
     private List<ReportScheduleEntry> scheduleEntries;
-    private List<Group> groups;
+    //private List<Group> groups;
+    private Group group;
+    private ExportType reportFormat;
+    private Boolean previousDateData;
 }

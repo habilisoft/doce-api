@@ -29,6 +29,24 @@ spring:
       max-file-size: 10MB
   main:
     allow-bean-definition-overriding: true
+  mail:
+    default-encoding: UTF-8
+    host: us2.smtp.mailhostbox.com
+    username: reportes@doce.do
+    password: bem@!Vt2
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    protocol: smtp
+    test-connection: true
+mail:
+  sender: JAVA
+  ses:
+    fromAddress: reportes@doce.do
 jwt:
   secret: Ws_rh+h*p)4=SzFC
 token-encryption:
@@ -37,10 +55,7 @@ token-encryption:
 application:
   oauthPassword: Ws_rh+h*p)4=SzFC
   oauthPassword2: ~kF3gs.BP2-Cwfw28_yS-xmB6C~4wU-Cmf
-mail:
-  sender: SES
-  ses:
-    fromAddress: reportes@doce.do
+
 cloud:
   aws:
     stack:

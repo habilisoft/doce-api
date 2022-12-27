@@ -1,5 +1,6 @@
 package com.habilisoft.doce.api.web.reports;
 
+import com.habilisoft.doce.api.domain.reports.late_arrivals.LateArrivalsReportService;
 import com.habilisoft.doce.api.domain.reports.late_arrivals.LateDeparturesExportable;
 import com.habilisoft.doce.api.persistence.repositories.reports.EarlyDeparturesAndArrivalsJpaReportRepository;
 import com.habilisoft.doce.api.persistence.repositories.reports.LateArrivalResponse;
@@ -40,13 +41,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LateArrivalsReportResource {
     private final EarlyDeparturesAndArrivalsJpaReportRepository earlyDeparturesReportRepository;
+    private final LateArrivalsReportService lateArrivalsReportService;
 
     @GetMapping
     public Page<?> getLateArrivalsReport(@RequestParam(name = "date", defaultValue = "") String date,
-                                           @RequestParam(name = "group", defaultValue = "") String groupId,
-                                           @RequestParam(name = "_page", required = false, defaultValue = "0") final Integer page,
-                                           @RequestParam(name = "_size", required = false, defaultValue = "25") final Integer size,
-                                           @RequestParam(name = "_sort", required = false, defaultValue = "") String sort) throws ParseException {
+                                         @RequestParam(name = "group", defaultValue = "") String groupId,
+                                         @RequestParam(name = "_page", required = false, defaultValue = "0") final Integer page,
+                                         @RequestParam(name = "_size", required = false, defaultValue = "25") final Integer size,
+                                         @RequestParam(name = "_sort", required = false, defaultValue = "") String sort) throws ParseException {
 
         final Pageable pageable = PageRequest.of(page, size);
         return earlyDeparturesReportRepository.getLateArrivals(date, groupId, pageable);
@@ -55,31 +57,16 @@ public class LateArrivalsReportResource {
     @PostMapping(value = "/export")
     public ResponseEntity<Resource> export(
             @RequestParam(name = "date", defaultValue = "") String date,
-            @RequestParam(name = "group", defaultValue = "") String groupId,
-            @RequestParam(name = "_page", required = false, defaultValue = "0") final Integer page,
-            @RequestParam(name = "_size", required = false, defaultValue = "25") final Integer size,
-            @RequestParam(name = "_sort", required = false, defaultValue = "") String sort,
-            @RequestBody ExportRequest exportRequest,
-            @RequestParam final Map<String, Object> queryMap) throws ParseException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, DocumentException, IOException {
+            @RequestParam(name = "group", defaultValue = "") String group,
+            @RequestBody ExportRequest exportRequest) throws ParseException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, DocumentException, IOException {
 
-        final Pageable pageable = PageRequest.of(page, 1000);
-        Page<LateArrivalResponse> responsePage = earlyDeparturesReportRepository.getLateArrivals(date, groupId, pageable);
+        exportRequest.setParams(Map.of(
+                "date", date,
+                "group", group
+        ));
 
-        List<Map<String, String>> records = responsePage.getContent()
-                .stream()
-                .map( r -> Map.of(
-                        "enrollId",String.valueOf(r.getEnroll_id()),
-                        "employeeName", r.getEmployee_name(),
-                        "group", r.getGroup_name(),
-                        "date", r.getDateString(),
-                        "hour", r.getHour(),
-                        "difference", r.getDifference()
-                ))
-                .collect(Collectors.toList());
-        exportRequest.setCaption("Reporte de Entradas Tardías");
-        Exportable exportable = new LateDeparturesExportable( records, exportRequest, "");
-        Exporter exporter = ExporterFactory.getInstance(exportRequest.getExportType());
-        Resource resource = exporter.export(exportable);
+        Resource resource = lateArrivalsReportService.getReport(exportRequest);
+
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)

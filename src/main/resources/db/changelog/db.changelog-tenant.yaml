@@ -35,3 +35,7 @@ databaseChangeLog:
     file: classpath:/migrations/tenant/14-add-employee-data-in-device.sql
 - include:
     file: classpath:/migrations/tenant/15-add-punch-policy-columns.sql
+- include:
+    file: classpath:/migrations/tenant/16-add-scheduled-reports-group-table.sql
+- include:
+    file: classpath:/migrations/tenant/17-add-group-column-to-scheduled-reports.sql
