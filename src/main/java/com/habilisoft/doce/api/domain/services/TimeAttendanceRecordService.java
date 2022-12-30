@@ -77,6 +77,13 @@ public class TimeAttendanceRecordService {
         final Employee employee = employeeRepository
                 .findById(record.getEmployee().getId())
                 .orElseThrow(() -> new EmployeeNotFoundException(record.getEmployee().getId()));
+
+        Date currentPunchTime = record.getTime();
+        final TimeAttendanceRecord lastPunch = getLastPunchFromCurrentSchedule(employee, currentPunchTime);
+        if(isConsecutivePunch(lastPunch, currentPunchTime)) {
+            return;
+        }
+
         //TODO: Optimize, getting too many details from database. Should be a single query to get employee, workshift and day detail
         WorkShift workShift = employee.getWorkShift();
         if(workShift == null) {
@@ -85,7 +92,6 @@ public class TimeAttendanceRecordService {
             return;
         }
         record.setWorkShift(workShift);
-        Date currentPunchTime = record.getTime();
         WorkShiftDetail schedule = getCurrentDaySchedule(workShift, currentPunchTime);
         if(schedule == null) {
             log.info(
@@ -100,11 +106,12 @@ public class TimeAttendanceRecordService {
         if (workShift.getPunchPolicy().getType() == PunchPolicyType.IN_TIME_RANGE) {
             processTimeRangePolicy(record, workShift, currentPunchTime, schedule);
         } else {
-            processLastPunchIsOutPolicy(record, employee, workShift, currentPunchTime, schedule);
+            processLastPunchIsOutPolicy(record, lastPunch, workShift, currentPunchTime, schedule);
         }
     }
 
     private void processTimeRangePolicy(TimeAttendanceRecord record, WorkShift workShift, Date currentPunchTime, WorkShiftDetail schedule) {
+
         Long lateGracePeriod = workShift.getLateGracePeriod();
         TimeRangePunchPolicy policy = (TimeRangePunchPolicy) workShift.getPunchPolicy();
         LocalTime punchTime = DateUtils.getTime(currentPunchTime);
@@ -125,11 +132,8 @@ public class TimeAttendanceRecordService {
         repository.save(record);
 
     }
-    private void processLastPunchIsOutPolicy(TimeAttendanceRecord record, Employee employee, WorkShift workShift, Date currentPunchTime, WorkShiftDetail schedule) {
+    private void processLastPunchIsOutPolicy(TimeAttendanceRecord record, TimeAttendanceRecord lastPunch, WorkShift workShift, Date currentPunchTime, WorkShiftDetail schedule) {
         Long lateGracePeriod = workShift.getLateGracePeriod();
-
-        //Get previous punch
-        final TimeAttendanceRecord lastPunch = getLastPunchFromCurrentSchedule(employee, schedule, currentPunchTime);
 
         if(lastPunch == null) {
             record.setPunchType(PunchType.IN);
@@ -153,6 +157,14 @@ public class TimeAttendanceRecordService {
                 repository.save(lastPunch);
             }
         }
+    }
+
+    public boolean isConsecutivePunch(TimeAttendanceRecord lastPunch, Date currentPunchTime) {
+        if(lastPunch == null) {
+            return false;
+        }
+        long differenceBetweenCurrentAndPreviousPunch = getDifferenceInMinutes(lastPunch.getTime(), currentPunchTime);
+        return differenceBetweenCurrentAndPreviousPunch <= CONSIDERED_CONSECUTIVE_MINUTES;
     }
 
     public boolean isEarlyDeparture(Long differenceInSeconds, Long lateGracePeriod) {
@@ -182,7 +194,7 @@ public class TimeAttendanceRecordService {
         return currentTime.until(previousTime, ChronoUnit.MINUTES);
     }
 
-    private TimeAttendanceRecord getLastPunchFromCurrentSchedule(Employee employee, WorkShiftDetail detail, Date recordDate) {
+    private TimeAttendanceRecord getLastPunchFromCurrentSchedule(Employee employee, Date recordDate) {
         final Pageable pageable = PageRequest.of(0, 1);
         final Page<TimeAttendanceRecord> timeAttendanceRecordPage = this.repository
                 .findEmployeeEntries(employee.getId(), recordDate, pageable);
