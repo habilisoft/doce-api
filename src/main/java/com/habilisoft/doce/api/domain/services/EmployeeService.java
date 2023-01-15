@@ -46,6 +46,7 @@ public class EmployeeService {
                                 .orElse(null)
                 )
                 .group(request.getGroup())
+                .workShift(request.getWorkShift())
                 .locationType(request.getLocationType())
                 .build();
 

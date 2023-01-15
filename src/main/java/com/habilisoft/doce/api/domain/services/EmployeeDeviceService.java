@@ -3,10 +3,13 @@ package com.habilisoft.doce.api.domain.services;
 import com.habilisoft.doce.api.config.multitenant.TenantContext;
 import com.habilisoft.doce.api.domain.events.EmployeeCreatedEvent;
 import com.habilisoft.doce.api.domain.events.EmployeeEditedEvent;
+import com.habilisoft.doce.api.domain.exceptions.DeviceNotFoundException;
 import com.habilisoft.doce.api.domain.exceptions.EmployeeNotFoundException;
 import com.habilisoft.doce.api.domain.model.Device;
 import com.habilisoft.doce.api.domain.model.Employee;
+import com.habilisoft.doce.api.domain.model.EmployeeDeviceData;
 import com.habilisoft.doce.api.domain.repositories.DeviceRepository;
+import com.habilisoft.doce.api.domain.repositories.EmployeeDeviceDataRepository;
 import com.habilisoft.doce.api.domain.repositories.EmployeeRepository;
 import com.habilisoft.doce.api.dto.device.DeleteUser;
 import com.habilisoft.doce.api.dto.device.SendUserToAllDevices;
@@ -16,6 +19,7 @@ import com.habilisoft.doce.api.persistence.repositories.EmployeeJpaRepo;
 import com.habilisoft.doce.api.queue.SqsQueueSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +41,7 @@ public class EmployeeDeviceService {
     private final SqsQueueSender queueSender;
     private final EmployeeJpaRepo employeeJpaRepo;
     private final EmployeeJpaConverter employeeJpaConverter;
-    private final ApplicationEventPublisher eventPublisher;
+    private final EmployeeDeviceDataRepository employeeDeviceDataRepository;
 
     @TransactionalEventListener
     public void onEmployeeEditedEvent(EmployeeEditedEvent event) {
@@ -74,6 +78,45 @@ public class EmployeeDeviceService {
         }
     }
 
+    public void sendEmployeeDataToDevice(final EmployeeDeviceData data, final Device device) {
+        if(device == null) {
+            log.warn("Could not sent employee to empty device {}", kv("employee", data.getEmployee()));
+            return;
+        }
+        Employee emp = data.getEmployee();
+
+        SendUserDataToDevice command = SendUserDataToDevice.builder()
+                .enrollId(emp.getEnrollId())
+                .name(emp.getFullName())
+                .backupNum(data.getNumber())
+                .record(NumberUtils.isCreatable(data.getRecord())
+                                ? NumberUtils.createInteger(data.getRecord())
+                                : data.getRecord())
+                .deviceId(device.getSerialNumber())
+                .admin(0)
+                .build();
+        log.info("Sending employee data to device {} {}", kv("employeeId", emp.getId()), kv("deviceId", device.getSerialNumber()));
+        queueSender.convertAndSend(command);
+    }
+
+    public void sendEmployeeDataToAllDevices(EmployeeDeviceData data) {
+        String clientId = TenantContext.getCurrentTenant();
+        Employee emp = data.getEmployee();
+        SendUserToAllDevices command = SendUserToAllDevices.builder()
+                .enrollId(emp.getEnrollId())
+                .name(emp.getFullName())
+                .record(NumberUtils.isCreatable(data.getRecord())
+                                ? NumberUtils.createInteger(data.getRecord())
+                                : data.getRecord())
+                .backupNum(data.getNumber())
+                .clientId(clientId)
+                .admin(0)
+                .build();
+        log.info("Sending employee data to all devices {} {}", kv("employeeId", emp.getId()), kv("clientId", clientId));
+        queueSender.convertAndSend(command);
+    }
+
+
     public void sendEmployeeDataToDevice(final Employee emp, final Device device) {
         if(device == null) {
             log.warn("Could not sent employee to empty device {}", kv("employee", emp));
@@ -83,8 +126,6 @@ public class EmployeeDeviceService {
         SendUserDataToDevice command = SendUserDataToDevice.builder()
                 .enrollId(emp.getEnrollId())
                 .name(emp.getFullName())
-                .record(emp.getFingerprintData())
-                .backupNum(0)
                 .deviceId(device.getSerialNumber())
                 .admin(0)
                 .build();
@@ -97,8 +138,6 @@ public class EmployeeDeviceService {
         SendUserToAllDevices command = SendUserToAllDevices.builder()
                 .enrollId(emp.getEnrollId())
                 .name(emp.getFullName())
-                .record(emp.getFingerprintData())
-                .backupNum(0)
                 .clientId(clientId)
                 .admin(0)
                 .build();
@@ -125,17 +164,27 @@ public class EmployeeDeviceService {
     }
 
     @Transactional
-    public Employee saveEmployeeDeviceData(SendUserDataToDevice sendUserDataToDevice) {
-        Integer enrollId = sendUserDataToDevice.getEnrollId();
-        String fpData = sendUserDataToDevice.getRecord();
+    public Employee saveEmployeeDeviceData(SendUserDataToDevice data) {
+        Integer enrollId = data.getEnrollId();
+        String fpData = data.getRecord().toString();
         Employee employee = employeeRepository.findByEnrollId(enrollId)
-                .orElse(Employee.builder()
+                .orElseGet(() -> employeeRepository.save(Employee.builder()
                         .enrollId(enrollId)
-                        .build());
-        employee.setFingerprintData(fpData);
-        employeeRepository.save(employee);
+                        .build())
+                );
 
-        sendEmployeeDataToAllDevices(employee);
+        Device device = deviceRepository.getBySerialNumber(data.getDeviceSerialNumber())
+                        .orElseThrow(()-> new DeviceNotFoundException(data.getDeviceSerialNumber()));
+
+        EmployeeDeviceData deviceData = employeeDeviceDataRepository.save(
+                EmployeeDeviceData.builder()
+                        .deviceModel(device.getDeviceInfo().getModelName())
+                        .number(data.getBackupNum())
+                        .employee(employee)
+                        .record(fpData)
+                        .build());
+
+        sendEmployeeDataToAllDevices(deviceData);
 
         return employee;
     }

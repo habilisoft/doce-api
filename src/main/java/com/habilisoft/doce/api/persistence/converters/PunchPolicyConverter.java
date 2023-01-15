@@ -44,6 +44,9 @@ public class PunchPolicyConverter {
     }
 
     public LinkedHashMap<String, Object> getPunchPolicy(PunchPolicy punchPolicy) {
+        if(punchPolicy == null) {
+            return null;
+        }
         LinkedHashMap<String, Object> data = new LinkedHashMap<>();
          switch (punchPolicy.getType()) {
             case LAST_PUNCH_IS_OUT -> data.put("type", PunchPolicyType.LAST_PUNCH_IS_OUT.name());

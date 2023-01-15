@@ -2,6 +2,7 @@ package com.habilisoft.doce.api.domain.commands;
 
 import com.habilisoft.doce.api.domain.model.Group;
 import com.habilisoft.doce.api.domain.model.LocationType;
+import com.habilisoft.doce.api.domain.model.WorkShift;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,4 +22,5 @@ public class CreateEmployee {
     private Group group;
     private Long locationId;
     private LocationType locationType;
+    private WorkShift workShift;
 }

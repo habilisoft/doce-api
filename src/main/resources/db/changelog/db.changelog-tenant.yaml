@@ -39,3 +39,5 @@ databaseChangeLog:
     file: classpath:/migrations/tenant/16-add-scheduled-reports-group-table.sql
 - include:
     file: classpath:/migrations/tenant/17-add-group-column-to-scheduled-reports.sql
+- include:
+    file: classpath:/migrations/tenant/18-add-employee-device-data.sql

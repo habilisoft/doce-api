@@ -17,17 +17,25 @@ public class SendUserToAllDevices extends QueueEvent {
     @JsonProperty(value = "backupnum")
     private Integer backupNum;
     private Integer admin;
-    private String record;
+    private Object record;
     private String clientId;
+    private String deviceModel;
 
     @Builder
-    public SendUserToAllDevices(Integer enrollId, String name, Integer backupNum, Integer admin, String record, String clientId) {
+    public SendUserToAllDevices(Integer enrollId,
+                                String name,
+                                Integer backupNum,
+                                Integer admin,
+                                String deviceModel,
+                                Object record,
+                                String clientId) {
         this.enrollId = enrollId;
         this.name = name;
         this.backupNum = backupNum;
         this.admin = admin;
         this.record = record;
         this.clientId = clientId;
+        this.deviceModel = deviceModel;
         this.type = Type.SEND_USER_TO_ALL_DEVICES;
     }
 }

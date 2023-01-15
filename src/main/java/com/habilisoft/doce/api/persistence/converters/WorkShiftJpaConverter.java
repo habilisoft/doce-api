@@ -29,11 +29,11 @@ public class WorkShiftJpaConverter implements JpaConverter<WorkShift, WorkShiftE
                         .weekWorkHours(j.getWeekWorkHours())
                         .name(j.getName())
                         .details(
-                                j.getDetails()
-                                        .stream()
-                                        .map(detailJpaConverter::fromJpaEntity)
-                                        .collect(Collectors.toSet())
-                        )
+                                Optional.ofNullable(j.getDetails())
+                                        .map( d -> d.stream()
+                                                .map(detailJpaConverter::fromJpaEntity)
+                                                .collect(Collectors.toSet()))
+                                        .orElse(null))
                         .lateGracePeriod(j.getLateGracePeriod())
                         .breakMinutes(j.getBreakMinutes())
                         .punchForBreak(j.getPunchForBreak())
@@ -61,12 +61,11 @@ public class WorkShiftJpaConverter implements JpaConverter<WorkShift, WorkShiftE
                 .build();
 
         entity.setDetails(
-                j.getDetails()
-                        .stream()
-                        .map(detailJpaConverter::toJpaEntity)
-                        .collect(Collectors.toSet())
-
-        );
+                Optional.ofNullable(j.getDetails())
+                                .map( d -> d.stream()
+                                        .map(detailJpaConverter::toJpaEntity)
+                                        .collect(Collectors.toSet()))
+                                        .orElse(null));
 
         return entity;
     }

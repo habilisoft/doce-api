@@ -17,15 +17,17 @@ public class SendUserDataToDevice extends QueueEvent {
     @JsonProperty(value = "backupnum")
     private Integer backupNum;
     private Integer admin;
-    private String record;
+    private Object record;
     private String deviceId;
+    private String deviceModel;
 
     @Builder
     public SendUserDataToDevice(final Integer enrollId,
                                 final String name,
                                 final Integer backupNum,
                                 final Integer admin,
-                                final String record,
+                                final Object record,
+                                final String deviceModel,
                                 final String deviceId) {
         this.enrollId = enrollId;
         this.name = name;
@@ -33,6 +35,7 @@ public class SendUserDataToDevice extends QueueEvent {
         this.admin = admin;
         this.record = record;
         this.deviceId = deviceId;
+        this.deviceModel = deviceModel;
         this.type = Type.SEND_USER_DATA_TO_DEVICE;
     }
 }
