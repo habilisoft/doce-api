@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.BooleanUtils;
 
 /**
  * Created on 8/21/22.
@@ -22,4 +23,9 @@ public class Employee {
     private LocationType locationType;
     private WorkShift workShift;
     private Group group;
+    private Boolean active;
+
+    public Boolean getActive() {
+        return BooleanUtils.toBooleanDefaultIfNull(active, true);
+    }
 }

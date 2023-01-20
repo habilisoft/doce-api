@@ -65,4 +65,7 @@ public class EmployeeEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "group_id")
     private GroupEntity group;
+
+    @Column
+    private Boolean active;
 }

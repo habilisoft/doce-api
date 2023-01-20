@@ -77,6 +77,9 @@ public class TimeAttendanceRecordService {
         final Employee employee = employeeRepository
                 .findById(record.getEmployee().getId())
                 .orElseThrow(() -> new EmployeeNotFoundException(record.getEmployee().getId()));
+        if(!employee.getActive()) {
+            return;
+        }
 
         Date currentPunchTime = record.getTime();
         final TimeAttendanceRecord lastPunch = getLastPunchFromCurrentSchedule(employee, currentPunchTime);

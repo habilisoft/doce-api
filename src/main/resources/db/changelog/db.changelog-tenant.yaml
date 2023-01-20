@@ -41,3 +41,5 @@ databaseChangeLog:
     file: classpath:/migrations/tenant/17-add-group-column-to-scheduled-reports.sql
 - include:
     file: classpath:/migrations/tenant/18-add-employee-device-data.sql
+- include:
+    file: classpath:/migrations/tenant/19-add-active-column-to-employees.sql

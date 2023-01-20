@@ -33,6 +33,7 @@ public class EmployeeJpaConverter implements JpaConverter<Employee, EmployeeEnti
                         .workShift(workShiftJpaConverter.toJpaEntity(d.getWorkShift()))
                         .location(locationJpaConverter.toJpaEntity(d.getLocation()))
                         .group(groupJpaConverter.toJpaEntity(d.getGroup()))
+                        .active(d.getActive())
                         .build())
                 .orElse(null);
     }
@@ -51,6 +52,7 @@ public class EmployeeJpaConverter implements JpaConverter<Employee, EmployeeEnti
                         .workShift(workShiftJpaConverter.fromJpaEntity(d.getWorkShift()))
                         .location(locationJpaConverter.fromJpaEntity(d.getLocation()))
                         .group(groupJpaConverter.fromJpaEntity(d.getGroup()))
+                        .active(d.getActive())
                         .build())
                 .orElse(null);
     }

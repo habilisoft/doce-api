@@ -27,4 +27,5 @@ public class EmployeeHttpResponse {
     private LocationType locationType;
     private WorkShift workShift;
     private Group group;
+    private Boolean active;
 }
