@@ -1,4 +1,4 @@
-package com.habilisoft.doce.api.utils.export.dto;
+package com.habilisoft.doce.api.reporting.export;
 
 import com.habilisoft.doce.api.utils.export.converters.ExportableFieldConverter;
 import lombok.AllArgsConstructor;

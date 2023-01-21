@@ -1,4 +1,4 @@
-package com.habilisoft.doce.api.reporting.domain;
+package com.habilisoft.doce.api.reporting.domain.model;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import java.util.Map;
  * Created on 6/1/23.
  */
 @Data
-public class FilterField {
+public class ReportUIFilter {
     private Integer displayOrder;
     private String displayName;
     private String field;
