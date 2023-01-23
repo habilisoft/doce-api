@@ -1,4 +1,4 @@
-FROM openjdk:15-windowsservercore
+FROM openjdk:15-oracle
 
 LABEL authors="Armando Perez <aprezv@gmail.com>"
 
