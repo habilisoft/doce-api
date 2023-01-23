@@ -1,6 +1,7 @@
 package com.habilisoft.doce.api.web.employees.converters;
 
 import com.habilisoft.doce.api.domain.model.Employee;
+import com.habilisoft.doce.api.domain.repositories.EmployeeDeviceDataRepository;
 import com.habilisoft.doce.api.persistence.entities.EmployeeEntity;
 import com.habilisoft.doce.api.web.employees.dto.EmployeeHttpResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +16,12 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class EmployeeEntityHttpConverter {
     private final ModelMapper modelMapper;
+    private final EmployeeDeviceDataRepository deviceDataRepository;
 
     public EmployeeHttpResponse toHttpResponse(EmployeeEntity entity) {
         EmployeeHttpResponse response = modelMapper.map(entity, EmployeeHttpResponse.class);
 
-        response.setHasFingerPrint(StringUtils.hasLength(entity.getFingerprintData()));
+        response.setHasFingerPrint(deviceDataRepository.hasFingerPrint(entity.getId()));
 
         return response;
     }
@@ -27,7 +29,7 @@ public class EmployeeEntityHttpConverter {
     public EmployeeHttpResponse toHttpResponse(Employee employee) {
         EmployeeHttpResponse response = modelMapper.map(employee, EmployeeHttpResponse.class);
 
-        response.setHasFingerPrint(StringUtils.hasLength(employee.getFingerprintData()));
+        response.setHasFingerPrint(deviceDataRepository.hasFingerPrint(employee.getId()));
 
         return response;
     }

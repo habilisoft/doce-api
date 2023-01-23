@@ -34,4 +34,10 @@ public class DefaultEmployeeDeviceDataRepository implements EmployeeDeviceDataRe
         jpaRepo.save(entity);
         return converter.fromJpaEntity(entity);
     }
+
+    @Override
+    public Boolean hasFingerPrint(Long employeeId) {
+
+        return jpaRepo.employeeHasFingerPrintRecord(employeeId);
+    }
 }

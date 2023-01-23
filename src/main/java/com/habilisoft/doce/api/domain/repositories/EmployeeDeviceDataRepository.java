@@ -7,4 +7,6 @@ import com.habilisoft.doce.api.domain.model.EmployeeDeviceData;
  */
 public interface EmployeeDeviceDataRepository {
     EmployeeDeviceData save(EmployeeDeviceData data);
+
+    Boolean hasFingerPrint(Long employeeId);
 }
