@@ -4,6 +4,8 @@ import com.habilisoft.doce.api.config.multitenant.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,7 @@ import java.io.IOException;
  * @author Daniel
  */
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class TenantFilter implements Filter {
 
     private static final String TENANT_HEADER = "TenantID";
