@@ -1,4 +1,4 @@
-FROM openjdk:15-alpine
+FROM openjdk:15-windowsservercore
 
 LABEL authors="Armando Perez <aprezv@gmail.com>"
 
