@@ -102,4 +102,8 @@ public class WorkShiftEntity extends BaseEntity {
         this.details = details;
     }
 
+    public WorkShiftEntity(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

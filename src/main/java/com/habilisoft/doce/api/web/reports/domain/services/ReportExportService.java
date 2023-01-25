@@ -33,7 +33,10 @@ public class ReportExportService {
     public Resource export(String reportSlug, ExportRequest exportRequest) throws CsvRequiredFieldEmptyException, DocumentException, CsvDataTypeMismatchException, IOException {
         Report report = repository.findBySlug(reportSlug)
                 .orElseThrow();
+        return export(report, exportRequest);
+    }
 
+    public Resource export(Report report, ExportRequest exportRequest) throws CsvRequiredFieldEmptyException, DocumentException, CsvDataTypeMismatchException, IOException{
         ReportSearchRequest request = ReportSearchRequest.builder()
                 .queryMap(buildQueryMapFromUserFilters(exportRequest.getUserFilters()))
                 .build();

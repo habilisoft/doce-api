@@ -36,16 +36,37 @@ public class WorkShiftSearchResource {
     }
 
     @GetMapping
-    public Page<?> searchEmployees(@RequestParam final Map<String, Object> queryMap,
-                                   @RequestParam(name = "_page", required = false, defaultValue = "0") final Integer page,
-                                   @RequestParam(name = "_size", required = false, defaultValue = "25") final Integer size,
-                                   @RequestParam(name = "_sort", required = false, defaultValue = "") String sort) {
+    public Page<?> search(@RequestParam final Map<String, Object> queryMap,
+                          @RequestParam(name = "_page", required = false, defaultValue = "0") final Integer page,
+                          @RequestParam(name = "_size", required = false, defaultValue = "25") final Integer size,
+                          @RequestParam(name = "_sort", required = false, defaultValue = "") String sort) {
 
         if (!StringUtils.hasLength(sort))
             sort = "-" + "createdDate";
 
         Page<WorkShiftEntity> entityPage =  service.search(
                 queryMap,
+                PageRequest.of(
+                        page,
+                        size,
+                        SortUtils.processSort(sort, getSortableFields())
+                )
+        );
+
+        return entityPage.map(converter::fromJpaEntity);
+    }
+
+    @GetMapping("/search-box")
+    public Page<?> searchByName(@RequestParam(name = "name", required = false, defaultValue = "") final String name,
+                                @RequestParam(name = "_page", required = false, defaultValue = "0") final Integer page,
+                                @RequestParam(name = "_size", required = false, defaultValue = "25") final Integer size,
+                                @RequestParam(name = "_sort", required = false, defaultValue = "") String sort) {
+
+        if (!StringUtils.hasLength(sort))
+            sort = "-" + "createdDate";
+
+        Page<WorkShiftEntity> entityPage =  service.searchByName(
+                name,
                 PageRequest.of(
                         page,
                         size,

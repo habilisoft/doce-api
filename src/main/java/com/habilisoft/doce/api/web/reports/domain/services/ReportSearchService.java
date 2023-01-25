@@ -7,10 +7,10 @@ import com.habilisoft.doce.api.reporting.domain.model.ReportSearchRequest;
 import com.habilisoft.doce.api.reporting.domain.repositories.ReportRepository;
 import com.habilisoft.doce.api.reporting.exceptions.InvalidQueryFieldException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -59,7 +59,7 @@ public class ReportSearchService {
     private String completeQuery(String query, ReportSearchRequest request, List<ReportQueryFilter> queryFilters) {
         String schema = TenantContext.getCurrentTenant();
         query = query.replace("[schema]", schema);
-        return query.concat(buildFilters(request.getQueryMap(), queryFilters));
+        return query.concat(buildFilters(query, request.getQueryMap(), queryFilters));
     }
 
     private String applySorting(String query, String defaultSort) {
@@ -75,11 +75,16 @@ public class ReportSearchService {
         );
     }
 
-    private String buildFilters(Map<String, Object> queryMap, List<ReportQueryFilter> queryFilters) {
+    private String buildFilters(String query, Map<String, Object> queryMap, List<ReportQueryFilter> queryFilters) {
         if(queryMap.isEmpty()) {
             return "";
         }
-        return " WHERE " + queryMap.entrySet()
+        String joinClause = " WHERE ";
+
+        if(StringUtils.containsIgnoreCase(query, "where")) {
+            joinClause = " AND ";
+        }
+        return joinClause + queryMap.entrySet()
                 .stream()
                 .map( entry -> {
                     ReportQueryFilter queryFilter = queryFilters.stream()

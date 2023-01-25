@@ -4,7 +4,9 @@ import com.habilisoft.doce.api.reporting.domain.model.Report;
 import com.habilisoft.doce.api.reporting.domain.model.ReportSearchRequest;
 import com.habilisoft.doce.api.reporting.domain.repositories.ReportRepository;
 import com.habilisoft.doce.api.reporting.export.ExportRequest;
+import com.habilisoft.doce.api.reporting.export.MailReportRequest;
 import com.habilisoft.doce.api.web.reports.domain.services.ReportExportService;
+import com.habilisoft.doce.api.web.reports.domain.services.ReportMailService;
 import com.habilisoft.doce.api.web.reports.domain.services.ReportSearchService;
 import com.itextpdf.text.DocumentException;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
@@ -37,6 +39,7 @@ public class ReportsResource {
     private final ReportRepository repository;
     private final ReportSearchService service;
     private final ReportExportService exportService;
+    private final ReportMailService mailService;
 
     @PostMapping
     ResponseEntity<?> create(@RequestBody Report report) {
@@ -58,9 +61,9 @@ public class ReportsResource {
 
     @GetMapping("/{reportSlug}")
     Page<?> search(@PathVariable String reportSlug,
-                @RequestParam final Map<String, Object> queryMap,
-                @RequestParam(name = "_page", required = false, defaultValue = "0") final Integer page,
-                @RequestParam(name = "_size", required = false, defaultValue = "25") final Integer size) {
+                   @RequestParam final Map<String, Object> queryMap,
+                   @RequestParam(name = "_page", required = false, defaultValue = "0") final Integer page,
+                   @RequestParam(name = "_size", required = false, defaultValue = "25") final Integer size) {
 
         queryMap.remove("_page");
         queryMap.remove("_size");
@@ -76,13 +79,20 @@ public class ReportsResource {
 
     @PostMapping("/{reportSlug}/export")
     ResponseEntity<Resource> export(@PathVariable String reportSlug,
-                   @RequestBody ExportRequest exportRequest) throws CsvRequiredFieldEmptyException, DocumentException, CsvDataTypeMismatchException, IOException {
+                                    @RequestBody ExportRequest exportRequest) throws CsvRequiredFieldEmptyException, DocumentException, CsvDataTypeMismatchException, IOException {
         Resource resource = exportService.export(reportSlug, exportRequest);
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment")
                 .body(resource);
+    }
+
+    @PostMapping("/{reportSlug}/export/send-mail")
+    ResponseEntity<?> sendMail(@PathVariable String reportSlug,
+                               @RequestBody MailReportRequest request) throws CsvRequiredFieldEmptyException, DocumentException, CsvDataTypeMismatchException, IOException {
+        mailService.sendReport(reportSlug, request);
+        return ResponseEntity.ok().build();
     }
 
 }

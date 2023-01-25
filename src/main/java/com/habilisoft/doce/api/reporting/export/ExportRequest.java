@@ -14,9 +14,6 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExportRequest {
-    private String caption;
     private ExportType exportType;
-    private List<String> userFieldsToExport;
     private List<UserFilter> userFilters;
-    private Map<String, String> params;
 }

@@ -11,6 +11,7 @@ import com.habilisoft.doce.api.domain.model.Employee;
 import com.habilisoft.doce.api.domain.model.Location;
 import com.habilisoft.doce.api.domain.model.LocationType;
 import com.habilisoft.doce.api.domain.repositories.EmployeeRepository;
+import com.habilisoft.doce.api.persistence.repositories.EmployeeJpaRepo;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
@@ -28,6 +29,7 @@ public class EmployeeService {
     private final EmployeeRepository repository;
     private final ApplicationEventPublisher eventPublisher;
     private final ModelMapper modelMapper;
+    private final EmployeeJpaRepo employeeJpaRepo;
 
     @Transactional
     public Employee create(CreateEmployee request) {
@@ -77,6 +79,7 @@ public class EmployeeService {
         employee.setDocumentNumber(request.getDocumentNumber());
         employee.setLocation(request.getLocation());
         employee.setWorkShift(request.getWorkShift());
+        employee.setEnrollId(request.getEnrollId());
         employee.setLocationType(
                 Optional.ofNullable(request.getLocation())
                         .map((e) -> LocationType.FIXED)
