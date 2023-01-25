@@ -76,6 +76,7 @@ public class EmployeeService {
         employee.setFullName(request.getFullName());
         employee.setDocumentNumber(request.getDocumentNumber());
         employee.setLocation(request.getLocation());
+        employee.setWorkShift(request.getWorkShift());
         employee.setLocationType(
                 Optional.ofNullable(request.getLocation())
                         .map((e) -> LocationType.FIXED)
