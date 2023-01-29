@@ -44,6 +44,6 @@ databaseChangeLog:
 - include:
     file: classpath:/migrations/tenant/19-add-active-column-to-employees.sql
 - include:
-    file: classpath:/migrations/tenant/20-update-scheduled-reports-table.sql
-- include:
     file: classpath:/migrations/tenant/21-create-reports-table.sql
+- include:
+    file: classpath:/migrations/tenant/20-update-scheduled-reports-table.sql
