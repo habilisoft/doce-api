@@ -14,6 +14,7 @@ public class ReportUIFilter {
     private String field;
     private Type type;
     private Map<String, Object> metadata;
+    private Boolean required;
 
     public enum Type {
         SELECT, DATE

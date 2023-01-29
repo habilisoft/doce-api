@@ -31,6 +31,7 @@ public class ScheduledReportService {
     public ScheduledReport update(Long reportId, ScheduledReport report) {
         report = repository.save(report);
 
+        scheduler.removeMeetingRemindersSchedule(report);
         taskService.deleteReminders(report);
         List<SendReportTask> tasks = taskService.createReminders(report);
         scheduler.scheduleReminders(tasks);

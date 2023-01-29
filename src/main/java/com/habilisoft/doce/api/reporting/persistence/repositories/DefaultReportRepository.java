@@ -46,4 +46,10 @@ public class DefaultReportRepository implements ReportRepository {
         return jpaRepo.findBySlug(reportSlug)
                 .map(converter::fromJpaEntity);
     }
+
+    @Override
+    public Optional<Report> findById(Long id) {
+        return jpaRepo.findById(id)
+                .map(converter::fromJpaEntity);
+    }
 }

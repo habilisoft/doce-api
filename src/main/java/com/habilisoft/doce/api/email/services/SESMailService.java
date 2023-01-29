@@ -12,6 +12,7 @@ import com.amazonaws.services.simpleemail.model.SendRawEmailRequest;
 import com.habilisoft.doce.api.email.models.EmailRequest;
 import com.habilisoft.doce.api.email.models.PlainTextEmailRequest;
 import com.habilisoft.doce.api.email.models.TemplateSource;
+import org.hibernate.validator.constraints.Email;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,7 +62,7 @@ public class SESMailService implements MailService {
         this.environment = environment;
     }
 
-    private AmazonSimpleEmailService getClient(){
+    private AmazonSimpleEmailService getClient() {
 
         return AmazonSimpleEmailServiceClientBuilder.standard()
                 .withCredentials(credentialsProvider)
@@ -72,12 +73,8 @@ public class SESMailService implements MailService {
 
     @Override
     public void sendPlainTextMessage(PlainTextEmailRequest request) {
-/*
-        if(true){
-            return;
-        }*/
 
-        String message = request.getText();
+        /*String message = request.getText();
 
         AmazonSimpleEmailService client = getClient();
 
@@ -89,12 +86,26 @@ public class SESMailService implements MailService {
                                 .withSubject(new Content().withCharset("UTF-8").withData(getSubject(request.getSubject())))
                 ).withSource(Optional.ofNullable(request.getFromAddress()).orElse(fromAddress));
 
-        client.sendEmail(req);
+        client.sendEmail(req);*/
+
+        sendMessage(
+                request.getText(),
+                EmailRequest.builder()
+                        .to(request.getTo())
+                        .attachments(request.getAttachments())
+                        .subject(request.getSubject())
+                        .fromAddress(request.getFromAddress())
+                        .build()
+                );
     }
 
     public void sendMessage(EmailRequest request) {
+        String bodyHtml = parseTemplate(request.getTemplate(), request.getModel());
+        sendMessage(bodyHtml, request);
+    }
+
+    public void sendMessage(String bodyHtml, EmailRequest request) {
         try {
-            String bodyHtml = parseTemplate(request.getTemplate(), request.getModel());
             Session session = Session.getDefaultInstance(new Properties());
 
             MimeMessage message = new MimeMessage(session);
@@ -102,7 +113,7 @@ public class SESMailService implements MailService {
 
             Address[] addresses = new Address[request.getTo().size()];
 
-            for(int i = 0; i < request.getTo().size() ; i++){
+            for (int i = 0; i < request.getTo().size(); i++) {
                 InternetAddress ia = new InternetAddress(request.getTo().get(i));
                 addresses[i] = ia;
             }
@@ -111,11 +122,11 @@ public class SESMailService implements MailService {
             message.setSubject(getSubject(request.getSubject()), "UTF-8");
             //message.setFrom(Optional.ofNullable(request.getFromAddress()).orElse(fromAddress));
 
-            if(!CollectionUtils.isEmpty(request.getCco())) {
+            if (!CollectionUtils.isEmpty(request.getCco())) {
 
                 Address[] cc = new Address[request.getCco().size()];
 
-                for(int i = 0; i < request.getCco().size() ; i++){
+                for (int i = 0; i < request.getCco().size(); i++) {
                     InternetAddress ia = new InternetAddress(request.getCco().get(i));
                     cc[i] = ia;
                 }
@@ -123,7 +134,7 @@ public class SESMailService implements MailService {
                 message.setRecipients(Message.RecipientType.BCC, cc);
             }
 
-            message.setFrom(Optional.ofNullable(request.getFromAddress()).orElse("MyCheckins <support@mycheckins.io>"));
+            message.setFrom(Optional.ofNullable(request.getFromAddress()).orElse("Reportes de Asistencia <reportes@doce.do>"));
             message.setRecipients(Message.RecipientType.TO, addresses);
 
             MimeMultipart msg_body = new MimeMultipart("alternative");
@@ -139,7 +150,7 @@ public class SESMailService implements MailService {
 
             msg.addBodyPart(wrap);
 
-            if(request.getAttachments()!=null && request.getAttachments().size()>0) {
+            if (request.getAttachments() != null && request.getAttachments().size() > 0) {
                 request.getAttachments().forEach(attachment -> {
                     try {
 
@@ -167,7 +178,7 @@ public class SESMailService implements MailService {
             SendRawEmailRequest rawEmailRequest =
                     new SendRawEmailRequest(rawMessage);
 
-            rawEmailRequest.setSource("MyCheckins <support@mycheckins.io>");
+            rawEmailRequest.setSource("Reportes de Asistencia <reportes@doce.do>");
 
             client.sendRawEmail(rawEmailRequest);
 
@@ -181,7 +192,7 @@ public class SESMailService implements MailService {
     private String getSubject(String subject) {
 
         String env = environment.getActiveProfiles()[0];
-        if("prod".equals(env)) {
+        if ("prod".equals(env)) {
             return subject;
         }
 

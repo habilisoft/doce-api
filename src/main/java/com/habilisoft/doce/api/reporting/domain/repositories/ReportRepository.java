@@ -12,6 +12,6 @@ public interface ReportRepository {
     Report save(Report report);
     List<Report> list();
     Report getQueryBySlug(String reportSlug);
-
     Optional<Report> findBySlug(String reportSlug);
+    Optional<Report> findById(Long id);
 }

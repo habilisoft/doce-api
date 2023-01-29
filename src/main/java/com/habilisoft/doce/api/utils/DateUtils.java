@@ -1,6 +1,7 @@
 package com.habilisoft.doce.api.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -48,8 +49,8 @@ public class DateUtils {
 
     public static String monthNameDayAndYear(String timezone, Locale locale){
         LocalDateTime ldt = LocalDateTime.now(ZoneId.of(timezone));
-        return ldt.atZone(ZoneId.of(timezone))
-                .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy", locale));
+        return StringUtils.capitalize(ldt.atZone(ZoneId.of(timezone))
+                .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy", locale)));
     }
 
     public static LocalTime getTime(Date date) {

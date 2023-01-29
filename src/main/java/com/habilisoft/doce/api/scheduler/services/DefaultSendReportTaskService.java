@@ -37,7 +37,6 @@ public class DefaultSendReportTaskService {
     @Transactional
     public void deleteReminders(ScheduledReport scheduledReport) {
         sendReportTaskRepository.deleteByScheduledReport(scheduledReport);
-
     }
 
     @Transactional

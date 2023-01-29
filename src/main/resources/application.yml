@@ -44,9 +44,9 @@ spring:
     protocol: smtp
     test-connection: true
 mail:
-  sender: JAVA
+  sender: SES
   ses:
-    fromAddress: reportes@doce.do
+    fromAddress: Reportes de Asistencia <reportes@doce.do>
 jwt:
   secret: Ws_rh+h*p)4=SzFC
 token-encryption:

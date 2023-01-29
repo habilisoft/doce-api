@@ -1,11 +1,10 @@
 package com.habilisoft.doce.api.persistence.scheduler.entitites;
 
-import com.habilisoft.doce.api.domain.model.Report;
 import com.habilisoft.doce.api.persistence.BaseEntity;
-import com.habilisoft.doce.api.persistence.entities.GroupEntity;
+import com.habilisoft.doce.api.reporting.export.UserFilter;
+import com.habilisoft.doce.api.reporting.export.enums.ExportType;
+import com.habilisoft.doce.api.reporting.persistence.entities.ReportEntity;
 import com.habilisoft.doce.api.scheduler.model.ReportScheduleEntry;
-import com.habilisoft.doce.api.scheduler.model.ScheduledReport;
-import com.habilisoft.doce.api.utils.export.enums.ExportType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,9 +41,8 @@ public class ScheduledReportEntity extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column
-    @Enumerated(EnumType.STRING)
-    private Report report;
+    @OneToOne
+    private ReportEntity report;
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
@@ -61,15 +59,7 @@ public class ScheduledReportEntity extends BaseEntity {
     @Column
     private Boolean previousDateData;
 
-    @OneToOne
-    private GroupEntity group;
-
-   /* @OneToMany
-    @JoinTable(
-            name="scheduled_report_groups",
-            joinColumns = @JoinColumn( name="scheduled_report_id"),
-            inverseJoinColumns = @JoinColumn( name="group_id")
-    )
-    List<GroupEntity> groups;*/
-
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    private List<UserFilter> userFilters;
 }

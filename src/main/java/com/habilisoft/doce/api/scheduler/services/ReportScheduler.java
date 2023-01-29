@@ -69,10 +69,10 @@ public class ReportScheduler {
                 new CronTrigger(task.getCronExpression()));
 
         scheduledTasks.put(task, scheduledFuture);
-
     }
 
     void removeReminderSchedule(SendReportTask task) {
+        task.setTenant(TenantContext.getCurrentTenant());
         log.info("Removing task from scheduler {}", kv("taskId", task.getId()));
 
         if (!scheduledTasks.containsKey(task))
