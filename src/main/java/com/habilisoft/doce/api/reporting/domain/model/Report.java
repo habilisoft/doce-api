@@ -1,13 +1,11 @@
 package com.habilisoft.doce.api.reporting.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import java.util.List;
 
 /**
@@ -32,6 +30,7 @@ public class Report {
     private List<ReportUIColumn> uiColumns;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<ReportQueryFilter> queryFilters;
+    private Boolean inlineQueryParams;
 
 
     public Report(String query, String countQuery) {

@@ -11,7 +11,7 @@ import java.util.Optional;
  * Created on 15/1/23.
  */
 public interface ReportJpaRepo extends JpaRepository<ReportEntity, Long> {
-    @Query("SELECT new ReportEntity(r.query, r.countQuery, r.defaultOrder, r.queryFilters) FROM ReportEntity r WHERE  r.slug = :slug")
+    @Query("SELECT new ReportEntity(r.query, r.countQuery, r.defaultOrder, r.queryFilters, r.inlineQueryParams) FROM ReportEntity r WHERE  r.slug = :slug")
     ReportEntity getQueryBySlug(@Param("slug") String slug);
 
     Optional<ReportEntity> findBySlug(String slug);

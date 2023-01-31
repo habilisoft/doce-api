@@ -62,6 +62,9 @@ public class ReportEntity {
     @Column(columnDefinition = "jsonb")
     private List<ReportQueryFilter> queryFilters;
 
+    @Column
+    private Boolean inlineQueryParams;
+
     public ReportEntity(String query, String countQuery) {
         this.query = query;
         this.countQuery = countQuery;
@@ -78,5 +81,13 @@ public class ReportEntity {
         this.countQuery = countQuery;
         this.defaultOrder = defaultOrder;
         this.queryFilters = (List<ReportQueryFilter>) queryFilters;
+    }
+
+    public ReportEntity(String query, String countQuery, String defaultOrder, Object queryFilters, Boolean inlineQueryParams) {
+        this.query = query;
+        this.countQuery = countQuery;
+        this.defaultOrder = defaultOrder;
+        this.queryFilters = (List<ReportQueryFilter>) queryFilters;
+        this.inlineQueryParams = inlineQueryParams;
     }
 }

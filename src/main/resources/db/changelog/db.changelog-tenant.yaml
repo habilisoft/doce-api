@@ -47,3 +47,5 @@ databaseChangeLog:
     file: classpath:/migrations/tenant/21-create-reports-table.sql
 - include:
     file: classpath:/migrations/tenant/20-update-scheduled-reports-table.sql
+- include:
+    file: classpath:/migrations/tenant/22-add-inline-query-params-column-to-reports-table.sql

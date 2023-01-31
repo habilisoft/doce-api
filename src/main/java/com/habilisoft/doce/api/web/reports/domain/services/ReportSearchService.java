@@ -7,6 +7,7 @@ import com.habilisoft.doce.api.reporting.domain.model.ReportSearchRequest;
 import com.habilisoft.doce.api.reporting.domain.repositories.ReportRepository;
 import com.habilisoft.doce.api.reporting.exceptions.InvalidQueryFieldException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -35,7 +36,7 @@ public class ReportSearchService {
 
     public Page<?> search(Report report, ReportSearchRequest request) {
         String searchQuery = buildSearchQuery(report, request);
-        String countQuery = completeQuery(report.getCountQuery(), request, report.getQueryFilters());
+        String countQuery = completeQuery(report.getCountQuery(), request, report);
         Long total = jdbcTemplate.queryForObject(countQuery, Long.class);
         List<Map<String, Object>> result = jdbcTemplate.queryForList(searchQuery);
         return new PageImpl<>(
@@ -46,20 +47,37 @@ public class ReportSearchService {
     }
 
     public List<Map<String, Object>> all(Report report, ReportSearchRequest request) {
-        String query = completeQuery(report.getQuery(), request, report.getQueryFilters());
+        String query = completeQuery(report.getQuery(), request, report);
         query = applySorting(query, report.getDefaultOrder());
         return jdbcTemplate.queryForList(query);
     }
 
     public String buildSearchQuery(Report report, ReportSearchRequest request) {
-        String query = completeQuery(report.getQuery(), request, report.getQueryFilters());
+        String query = completeQuery(report.getQuery(), request, report);
         query = applySorting(query, report.getDefaultOrder());
         return applyPagination(query, request);
     }
-    private String completeQuery(String query, ReportSearchRequest request, List<ReportQueryFilter> queryFilters) {
+    private String completeQuery(String query, ReportSearchRequest request, Report report) {
+        List<ReportQueryFilter> queryFilters = report.getQueryFilters();
         String schema = TenantContext.getCurrentTenant();
         query = query.replace("[schema]", schema);
-        return query.concat(buildFilters(query, request.getQueryMap(), queryFilters));
+
+        return BooleanUtils.isTrue(report.getInlineQueryParams())
+        ? buildInlineQueryFilters(query, request.getQueryMap(), queryFilters)
+        : query.concat(buildFilters(query, request.getQueryMap(), queryFilters));
+    }
+
+    private String buildInlineQueryFilters(String query, Map<String, Object> queryMap, List<ReportQueryFilter> queryFilters) {
+        if(queryMap.isEmpty()) {
+            return query;
+        }
+        for (ReportQueryFilter filter : queryFilters) {
+            String key = filter.getUiField();
+            Object value = queryMap.getOrDefault(key, "''");
+            Object param = getParam(filter.getType(), value);
+            query = query.replace(String.format(":%s", key), String.valueOf(param));
+        }
+        return query;
     }
 
     private String applySorting(String query, String defaultSort) {
