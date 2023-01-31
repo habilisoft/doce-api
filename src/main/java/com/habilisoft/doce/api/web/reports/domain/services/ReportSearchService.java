@@ -73,9 +73,8 @@ public class ReportSearchService {
         }
         for (ReportQueryFilter filter : queryFilters) {
             String key = filter.getUiField();
-            Object value = queryMap.getOrDefault(key, "''");
-            Object param = getParam(filter.getType(), value);
-            query = query.replace(String.format(":%s", key), String.valueOf(param));
+            Object value = queryMap.getOrDefault(key, "");
+            query = query.replace(String.format(":%s", key), String.format("'%s'",value));
         }
         return query;
     }
