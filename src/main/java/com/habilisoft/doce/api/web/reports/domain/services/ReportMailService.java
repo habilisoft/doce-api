@@ -42,7 +42,7 @@ public class ReportMailService {
                         .attachments(
                                 List.of(
                                         Attachment.builder()
-                                                .name(String.format("%s.%s", report.getName(), request.getExportType().getName()))
+                                                .name(String.format("%s.%s", report.getName(), request.getExportType().name()))
                                                 .inputStream(inputStream)
                                                 .build()
                                 )
