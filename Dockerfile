@@ -2,7 +2,7 @@ FROM openjdk:15-oracle
 
 LABEL authors="Armando Perez <aprezv@gmail.com>"
 
-ADD doce-api-*.jar /app/api.jar
+ADD doce-api.jar /app/api.jar
 
 WORKDIR /app
 
