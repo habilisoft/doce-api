@@ -6,8 +6,26 @@ spring:
     url: jdbc:postgresql://localhost:5432/timeattendance
     username: postgres
     password: Alcohol145.
+  jpa:
+    show-sql: true
+  mail:
+    default-encoding: UTF-8
+    host: us2.smtp.mailhostbox.com
+    username: reportes@doce.do
+    password: bem@!Vt2
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    protocol: smtp
+    test-connection: false
 mail:
-  sender: JAVA
+  sender: SES
+  ses:
+    fromAddress: Reportes de Asistencia <reportes@doce.io>
 cloud:
   aws:
     stack:
@@ -15,8 +33,17 @@ cloud:
     region:
       static: us-east-1
     credentials:
-      accessKey: AKIA3U2JKO4T27DYS7ET
-      secretKey: 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
+      accessKey: AKIAXJ2VXKUI5JSYE5FC
+      secretKey: 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
     sqs:
-      api-queue: doce-api-local
-      device-queue: doce-device-local
+      api-queue: api-doce-local
+      device-queue: device-doce-local
+logging:
+  level:
+    org:
+      hibernate:
+        type:
+          descriptor:
+            sql:
+              BasicBinder=TRACE:
+        SQL=DEBUG:
