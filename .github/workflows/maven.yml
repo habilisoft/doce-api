@@ -67,6 +67,7 @@ jobs:
         env:
           IMAGE: ${{vars.ECR_REGISTRY}}/${{vars.ECR_REPO}}:${{github.run_number}}
       - name: Delete artifact
+        if: ${{ false }}
         uses: geekyeggo/delete-artifact@v2
         with:
           name: doce-api.jar
@@ -91,6 +92,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
       - name: Deploy to Amazon ECS service
+        if: ${{ false }}
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.render-web-container.outputs.task-definition }}
