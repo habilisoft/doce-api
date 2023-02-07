@@ -29,7 +29,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: doce-api
+          name: artifact
           path: target/doce-api.jar
           retention-days: 1
   docker-build:
@@ -41,8 +41,8 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v3
         with:
-          name: doce-api
-          path: doce-api.jar
+          name: artifact
+          path: artifact
       - name: Test Artifact
         run: ls -R
       - name: Configure AWS credentials
@@ -64,7 +64,7 @@ jobs:
       - name: Delete artifact
         uses: geekyeggo/delete-artifact@v2
         with:
-          name: doce-api
+          name: artifact
   aws-deploy:
     name: "Deploy to AWS ECS"
     runs-on: ubuntu-latest
