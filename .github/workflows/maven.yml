@@ -6,19 +6,16 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI with Maven
-
+name: Build and Deploy to AWS ECS
 on:
   push:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-
 jobs:
   build:
-
+    name: "Maven Build"
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 19
@@ -32,48 +29,44 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: doce-api.jar
-          path: target/api-*.jar
+          name: doce-api
+          path: target/doce-api.jar
           retention-days: 1
   docker-build:
+    name: "Docker Build"
     runs-on: ubuntu-latest
     needs: [build]
     steps:
       - uses: actions/checkout@v3
-
       - name: Download Artifact
         uses: actions/download-artifact@v3
         with:
-          name: doce-api.jar
+          name: doce-api
           path: doce-api.jar
-
+      - name: Test Artifact
+        run: ls -R
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-
       - name: Build the Docker image
         id: build-image
         run: |
           docker build . --file Dockerfile --tag $IMAGE
           docker push $IMAGE
-          echo "image=$IMAGE" >> $GITHUB_OUTPUT
         env:
           IMAGE: ${{vars.ECR_REGISTRY}}/${{vars.ECR_REPO}}:${{github.run_number}}
       - name: Delete artifact
-        if: ${{ false }}
         uses: geekyeggo/delete-artifact@v2
         with:
-          name: doce-api.jar
-      - name: Print image
-        run: echo "${{ steps.build-image.outputs.image }}"
+          name: doce-api
   aws-deploy:
+    name: "Deploy to AWS ECS"
     runs-on: ubuntu-latest
     needs: [docker-build]
     steps:

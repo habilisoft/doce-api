@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.armando.timeattendance</groupId>
-    <artifactId>api</artifactId>
+    <artifactId>doce-api</artifactId>
     <version>1.0.0</version>
     <name>api</name>
     <description>Time Attendance API</description>
@@ -145,6 +145,7 @@
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
