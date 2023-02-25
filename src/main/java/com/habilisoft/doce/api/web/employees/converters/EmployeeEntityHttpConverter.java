@@ -2,6 +2,7 @@ package com.habilisoft.doce.api.web.employees.converters;
 
 import com.habilisoft.doce.api.domain.model.Employee;
 import com.habilisoft.doce.api.domain.repositories.EmployeeDeviceDataRepository;
+import com.habilisoft.doce.api.persistence.entities.BaseEmployee;
 import com.habilisoft.doce.api.persistence.entities.EmployeeEntity;
 import com.habilisoft.doce.api.web.employees.dto.EmployeeHttpResponse;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,9 @@ public class EmployeeEntityHttpConverter {
         response.setHasFingerPrint(deviceDataRepository.hasFingerPrint(employee.getId()));
 
         return response;
+    }
+
+    public EmployeeHttpResponse toHttpResponse(BaseEmployee entity) {
+        return modelMapper.map(entity, EmployeeHttpResponse.class);
     }
 }

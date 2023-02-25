@@ -1,5 +1,6 @@
 package com.habilisoft.doce.api.web.employees.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.habilisoft.doce.api.domain.model.Group;
 import com.habilisoft.doce.api.domain.model.Location;
 import com.habilisoft.doce.api.domain.model.LocationType;
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EmployeeHttpResponse {
     private Long id;
     private String fullName;
