@@ -39,4 +39,12 @@ public interface EmployeeJpaRepo extends ExtendedRepository<EmployeeEntity, Long
 
     @Query(value = "select workshift_id from employees where id = :employeeId", nativeQuery = true)
     Long getEmployeeWorkShiftId(Long employeeId);
+
+    @Modifying
+    @Query(value = "UPDATE employees SET active = false WHERE id = :id", nativeQuery = true)
+    void disableEmployee(@Param("id") Long id);
+
+    @Modifying
+    @Query(value = "UPDATE employees SET active = true WHERE id = :id", nativeQuery = true)
+    void enableEmployee(Long id);
 }

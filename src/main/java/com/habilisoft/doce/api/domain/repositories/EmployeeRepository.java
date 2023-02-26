@@ -17,4 +17,8 @@ public interface EmployeeRepository {
     Integer getNextEnrollId();
 
     Employee save(Employee employee);
+
+    void disableEmployee(Long id);
+
+    void enableEmployee(Long id);
 }

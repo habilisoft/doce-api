@@ -6,6 +6,7 @@ import com.habilisoft.doce.api.domain.repositories.EmployeeRepository;
 import com.habilisoft.doce.api.persistence.converters.EmployeeJpaConverter;
 import com.habilisoft.doce.api.persistence.entities.EmployeeEntity;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -61,5 +62,17 @@ public class DefaultEmployeeRepository implements EmployeeRepository {
         EmployeeEntity entity = converter.toJpaEntity(employee);
         jpaRepo.save(entity);
         return converter.fromJpaEntity(entity);
+    }
+
+    @Override
+    @Transactional
+    public void disableEmployee(Long id) {
+        jpaRepo.disableEmployee(id);
+    }
+
+    @Override
+    @Transactional
+    public void enableEmployee(Long id) {
+        jpaRepo.enableEmployee(id);
     }
 }

@@ -175,6 +175,14 @@ public class EmployeeService {
         return this.repository.findById(id);
     }
 
+    public void disableEmployee(Long id) {
+        repository.disableEmployee(id);
+    }
+
+    public void enableEmployee(Long id) {
+        repository.enableEmployee(id);
+    }
+
     /*public WorkShift getEmployeeWorkShift(final Long employeeId) {
         final Optional<Employee> optional = this.repository.findById(employeeId);
 
