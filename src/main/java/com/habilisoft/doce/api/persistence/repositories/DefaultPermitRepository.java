@@ -34,4 +34,9 @@ public class DefaultPermitRepository implements PermitRepository {
         entity = jpaRepo.save(entity);
         return converter.fromJpaEntity(entity);
     }
+
+    @Override
+    public void delete(Long permitId) {
+        jpaRepo.deleteById(permitId);
+    }
 }

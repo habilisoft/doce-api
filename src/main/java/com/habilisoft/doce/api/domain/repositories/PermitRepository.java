@@ -10,4 +10,6 @@ public interface PermitRepository {
     EmployeePermit create(EmployeePermit employeePlanning);
 
     EmployeePermit edit(EmployeePermit permit);
+
+    void delete(Long permitId);
 }

@@ -20,4 +20,8 @@ public class EmployeePermitService {
     public EmployeePermit editPermit(EmployeePermit permit) {
         return permitRepository.edit(permit);
     }
+
+    public void deletePermit(Long permitId) {
+        permitRepository.delete(permitId);
+    }
 }
