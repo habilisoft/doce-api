@@ -39,5 +39,13 @@ public class DeviceInfo {
     private String firmware;
     @JsonProperty(value = "fpalgo")
     private String fpAlgorithm;
+    @JsonProperty(value = "falgo")
+    private String faceAlgorithm;
+    @JsonProperty(value = "facesize")
+    private Integer faceSize;
+    @JsonProperty(value = "usedface")
+    private Integer usedFace;
+    @JsonProperty(value = "netinuse")
+    private Integer netInUse;
     private String mac;
 }
