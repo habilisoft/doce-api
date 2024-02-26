@@ -53,3 +53,5 @@ databaseChangeLog:
     file: classpath:/migrations/tenant/22-permit-tables.sql
 - include:
     file: classpath:/migrations/tenant/23-add-device-props.sql
+- include:
+    file: classpath:/migrations/tenant/24-add-used-rt-log.sql
