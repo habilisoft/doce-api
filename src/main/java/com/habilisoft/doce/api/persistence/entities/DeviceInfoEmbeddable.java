@@ -40,4 +40,18 @@ public class DeviceInfoEmbeddable {
     @JsonProperty(value = "fpalgo")
     private String fpAlgorithm;
     private String mac;
+    @JsonProperty(value = "usedrtlog")
+    private Integer usedRtLog;
+    @JsonProperty(value = "usb4g")
+    private Integer usb4G;
+    @JsonProperty(value = "intercom")
+    private Integer intercom;
+    @JsonProperty(value = "floors")
+    private Integer floors;
+    @JsonProperty(value = "charid")
+    private String charId;
+    @JsonProperty(value = "useosdp")
+    private Integer useOsdp;
+    @JsonProperty(value = "dislanguage")
+    private Integer disLanguage;
 }

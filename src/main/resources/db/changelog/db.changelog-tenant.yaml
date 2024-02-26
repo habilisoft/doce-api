@@ -51,3 +51,5 @@ databaseChangeLog:
     file: classpath:/migrations/tenant/22-add-inline-query-params-column-to-reports-table.sql
 - include:
     file: classpath:/migrations/tenant/22-permit-tables.sql
+- include:
+    file: classpath:/migrations/tenant/23-add-device-props.sql
