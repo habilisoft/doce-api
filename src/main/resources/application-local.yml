@@ -47,3 +47,7 @@ logging:
             sql:
               BasicBinder=TRACE:
         SQL=DEBUG:
+device-service:
+  url: http://app.doce.do:7788/pub
+  username: 4WLcIYf4IGrwH8Fc
+  password: B7rEvj!spN!^3RsQ

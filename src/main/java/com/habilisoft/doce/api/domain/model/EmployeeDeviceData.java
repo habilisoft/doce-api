@@ -1,6 +1,5 @@
 package com.habilisoft.doce.api.domain.model;
 
-import com.habilisoft.doce.api.persistence.entities.EmployeeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

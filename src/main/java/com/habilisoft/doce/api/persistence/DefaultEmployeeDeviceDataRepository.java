@@ -3,11 +3,14 @@ package com.habilisoft.doce.api.persistence;
 import com.habilisoft.doce.api.domain.model.EmployeeDeviceData;
 import com.habilisoft.doce.api.domain.repositories.EmployeeDeviceDataRepository;
 import com.habilisoft.doce.api.persistence.converters.EmployeeDeviceDataJpaConverter;
+import com.habilisoft.doce.api.persistence.entities.EmployeeBiometricDataResponse;
 import com.habilisoft.doce.api.persistence.entities.EmployeeDeviceDataEntity;
 import com.habilisoft.doce.api.persistence.entities.EmployeeEntity;
 import com.habilisoft.doce.api.persistence.repositories.EmployeeDeviceDataJpaRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Created on 14/1/23.
@@ -39,5 +42,10 @@ public class DefaultEmployeeDeviceDataRepository implements EmployeeDeviceDataRe
     public Boolean hasFingerPrint(Long employeeId) {
 
         return jpaRepo.employeeHasFingerPrintRecord(employeeId);
+    }
+
+    @Override
+    public List<EmployeeBiometricDataResponse> getEmployeeBiometricData(Long employeeId) {
+        return jpaRepo.getEmployeeBiometricData(employeeId);
     }
 }

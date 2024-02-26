@@ -2,7 +2,7 @@ databaseChangeLog:
 - include:
     file: classpath:/migrations/public/v_001-changelog.sql
 - include:
-      file: classpath:/migrations/public/add-users-columns.sql
+    file: classpath:/migrations/public/add-users-columns.sql
 - include:
     file: classpath:/migrations/public/1-create-sequences.sql
 - include:
@@ -11,3 +11,5 @@ databaseChangeLog:
     file: classpath:/migrations/public/3-drop-not-null-client-device.sql
 - include:
     file: classpath:/migrations/public/4-add-employee-data-in-device.sql
+- include:
+    file: classpath:/migrations/public/5-add-device-languages.sql
