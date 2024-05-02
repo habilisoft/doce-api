@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -25,6 +26,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "devices")
 @NoArgsConstructor
+@Where(clause = "deleted is not true")
 public class DeviceEntity extends BaseEntity {
     @Id
     @Column(name = "serial_number")
