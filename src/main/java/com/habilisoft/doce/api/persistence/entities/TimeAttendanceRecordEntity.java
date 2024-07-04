@@ -15,6 +15,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.Column;
 import javax.persistence.ColumnResult;
@@ -547,6 +549,7 @@ public class TimeAttendanceRecordEntity extends BaseEntity {
     private DeviceEntity device;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @NotFound(action = NotFoundAction.IGNORE)
     @JoinColumn(name = "employee_id")
     private EmployeeEntity employee;
 
