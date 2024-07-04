@@ -21,4 +21,5 @@ public interface EmployeeRepository {
     void disableEmployee(Long id);
 
     void enableEmployee(Long id);
+    void deleteEmployee(Long id);
 }

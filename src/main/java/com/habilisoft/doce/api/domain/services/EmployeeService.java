@@ -32,6 +32,11 @@ public class EmployeeService {
     private final EmployeeJpaRepo employeeJpaRepo;
 
     @Transactional
+    public void deleteEmployee(Long id) {
+        repository.deleteEmployee(id);
+    }
+
+    @Transactional
     public Employee create(CreateEmployee request) {
         final Optional<Employee> employeeExists = repository.findByEnrollId(request.getEnrollId());
 

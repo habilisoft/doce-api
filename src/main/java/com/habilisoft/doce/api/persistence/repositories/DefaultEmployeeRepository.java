@@ -75,4 +75,9 @@ public class DefaultEmployeeRepository implements EmployeeRepository {
     public void enableEmployee(Long id) {
         jpaRepo.enableEmployee(id);
     }
+
+    @Override
+    public void deleteEmployee(Long id) {
+        jpaRepo.deleteById(id);
+    }
 }
