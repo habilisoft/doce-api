@@ -30,7 +30,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "employees")
 @Where(clause = "deleted='false'")
-@SQLDelete(sql = "update employees set deleted = true where id = ?")
+@SQLDelete(sql = "update employees set deleted = true, enroll_id = null where id = ?")
 @Builder
 public class EmployeeEntity extends BaseEntity {
 
