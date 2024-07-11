@@ -68,4 +68,7 @@ public class EmployeeEntity extends BaseEntity {
 
     @Column
     private Boolean active;
+
+    @Column(name = "is_device_admin", insertable = false, updatable = false)
+    private Boolean isDeviceAdmin;
 }
