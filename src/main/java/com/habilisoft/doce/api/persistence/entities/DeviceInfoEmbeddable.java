@@ -54,4 +54,8 @@ public class DeviceInfoEmbeddable {
     private Integer useOsdp;
     @JsonProperty(value = "dislanguage")
     private Integer disLanguage;
+    @JsonProperty(value = "facesize")
+    private Integer faceSize;
+    @JsonProperty(value = "usedface")
+    private Integer usedFace;
 }

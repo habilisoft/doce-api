@@ -57,3 +57,5 @@ databaseChangeLog:
     file: classpath:/migrations/tenant/24-add-used-rt-log.sql
 - include:
     file: classpath:/migrations/tenant/25-add-device-admin-column.sql
+- include:
+    file: classpath:/migrations/tenant/26-add-face-columns-to-device.sql
