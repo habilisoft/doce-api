@@ -1,4 +1,4 @@
-FROM openjdk:15-oracle
+FROM amazoncorretto:17-alpine-full
 
 LABEL authors="Armando Perez <aprezv@gmail.com>"
 
