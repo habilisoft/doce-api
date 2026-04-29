@@ -3,30 +3,25 @@ package com.habilisoft.doce.api.email.services;
 import com.habilisoft.doce.api.email.models.Attachment;
 import com.habilisoft.doce.api.email.models.EmailRequest;
 import com.habilisoft.doce.api.email.models.PlainTextEmailRequest;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.core.env.Environment;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.mail.util.ByteArrayDataSource;
 import java.util.Date;
 
 @Service
-@ConditionalOnProperty(name = "mail.sender", havingValue = "JAVA")
+@ConditionalOnExpression("'${mail.enabled:true}' == 'true' and '${mail.sender:}' == 'JAVA'")
 public class DefaultMailService implements MailService {
     private final JavaMailSender mailSender;
-    private final Environment environment;
 
-    public DefaultMailService(final JavaMailSender mailSender,
-                              final Environment environment) {
+    public DefaultMailService(final JavaMailSender mailSender) {
 
         this.mailSender = mailSender;
-        this.environment = environment;
     }
 
     @Override

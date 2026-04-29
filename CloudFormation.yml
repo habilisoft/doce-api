@@ -54,7 +54,7 @@ Parameters:
   BucketName:
     Type: String
     Description: Name of the s3 bucket (no dots)
-    Default: doce-files
+    Default: habilisoft-doce-files
   ActiveProfile:
     Type: String
     Description: Active profile properties (dev, qa prod)
@@ -86,17 +86,17 @@ Parameters:
   InstanceImageId:
     Type: String
     Description: EC2 Instance Image ID
-    Default: ami-07da26e39622a03dc
+    Default: ami-008a28c812e548417
   InstanceKeyPair:
     Type: String
     Description: Name of an existing EC2 KeyPair to enable SSH access to the cluster instances
     MinLength: 1
     MaxLength: 255
-    Default: Habilisoft
+    Default: Habilisoft-New
   InstanceType:
     Type: String
     Description: Cluster instance Type
-    Default: t2.micro
+    Default: t2.medium
     AllowedValues:
       - t2.micro
       - t2.small
@@ -107,11 +107,11 @@ Parameters:
   DBInstanceType:
     Type: String
     Description: Database Instace Class database
-    Default: db.t2.micro
+    Default: db.t3.micro
     AllowedValues:
-      - db.t2.micro
-      - db.t2.small
-      - db.t2.medium
+      - db.t3.micro
+      - db.t3.small
+      - db.t3.medium
       - db.m3.medium
       - db.m3.large
       - db.m3.xlarge
@@ -154,11 +154,11 @@ Parameters:
   HostedZoneId:
     Type: String
     Description: Id of the Hosted Zone
-    Default: Z01275702M4FNR9BR9G8N
+    Default: Z09683413LC4LXK00253B
   DomainName:
     Type: String
     Description: Name of the record set to loadbalancer dns name will be attach
-    Default: app.doce.do
+    Default: doce.habilisoft.do
 Conditions:
   createMultiZone: !Equals [!Ref MultiAZDeplyment, true]
 Resources:
@@ -805,37 +805,37 @@ Resources:
       LoadBalancerArn: !Ref loadBalancer
       Port: 7788
       Protocol: "HTTP"
-  launchConfiguration:
-    Type: AWS::AutoScaling::LaunchConfiguration
+  launchTemplate:
+    Type: AWS::EC2::LaunchTemplate
     Properties:
-      ImageId: !Ref InstanceImageId
-      SecurityGroups:
-        - !Ref ec2SecurityGroup
-      KeyName: !Ref InstanceKeyPair
-      UserData:
-        Fn::Base64:
-          !Sub |
+      LaunchTemplateName: !Join
+        - '-'
+        - - !Ref ClusterName
+          - 'launch-template'
+      LaunchTemplateData:
+        ImageId: !Ref InstanceImageId
+        SecurityGroupIds:
+          - !Ref ec2SecurityGroup
+        KeyName: !Ref InstanceKeyPair
+        UserData:
+          Fn::Base64:
+            !Sub |
             #!/bin/bash -xe
-            echo ECS_CLUSTER=${cluster} >> /etc/ecs/ecs.config
-            sudo yum install -y python34
-            curl -O https://bootstrap.pypa.io/get-pip.py
-            python3 get-pip.py --user
-            export PATH=~/.local/bin:$PATH
-            source ~/.bash_profile
-            pip install --upgrade --user awscli
-            aws configure set default.region us-east-2
-            aws configure set aws_access_key_id ${ecrUserAccessKey}
-            aws configure set aws_secret_access_key ${ecrUserAccessKey.SecretAccessKey}
-            eval $(aws ecr get-login --no-include-email | sed 's|https://||')
-      InstanceType: !Ref InstanceType
-      InstanceMonitoring: true
-      IamInstanceProfile: !Ref ecsInstanceProfile
-      EbsOptimized: false
+            cat <<'EOF' >> /etc/ecs/ecs.config
+            ECS_CLUSTER=${cluster}
+            ECS_ENABLE_AWSLOGS_EXECUTIONROLE_OVERRIDE=true
+            EOF
+        InstanceType: !Ref InstanceType
+        Monitoring:
+          Enabled: true
+        IamInstanceProfile:
+          Name: !Ref ecsInstanceProfile
+        EbsOptimized: false
   autoScalingGroup:
     DependsOn:
       - subnetZoneA
       - subnetZoneB
-      - launchConfiguration
+      - launchTemplate
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
@@ -845,7 +845,9 @@ Resources:
       DesiredCapacity: "1"
       HealthCheckGracePeriod: 0
       HealthCheckType: EC2
-      LaunchConfigurationName: !Ref launchConfiguration
+      LaunchTemplate:
+        LaunchTemplateId: !Ref launchTemplate
+        Version: !GetAtt launchTemplate.LatestVersionNumber
       MaxSize: "1"
       MinSize: "0"
       Tags:
@@ -885,7 +887,7 @@ Resources:
       DBInstanceIdentifier: !Ref DatabaseInstanceName
       DBName: !Ref DatabaseName
       Engine: postgres
-      EngineVersion: 12.9
+      EngineVersion: 18
       MasterUsername: !Ref DatasourceUser
       MasterUserPassword: !Ref DatasourcePassword
       MultiAZ: !If [createMultiZone, true, false]

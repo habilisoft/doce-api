@@ -42,8 +42,9 @@ spring:
           starttls:
             enable: true
     protocol: smtp
-    test-connection: true
+    test-connection: ${mail.enabled:true}
 mail:
+  enabled: false
   sender: SES
   ses:
     fromAddress: Reportes de Asistencia <reportes@doce.do>
