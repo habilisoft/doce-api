@@ -55,10 +55,12 @@ jobs:
       - name: Build the Docker image
         id: build-image
         run: |
-          docker build . --file Dockerfile --tag $IMAGE
+          docker build . --file Dockerfile --tag $IMAGE --tag $LATEST_IMAGE
           docker push $IMAGE
+          docker push $LATEST_IMAGE
         env:
           IMAGE: ${{vars.ECR_REGISTRY}}/${{vars.ECR_REPO}}:${{github.run_number}}
+          LATEST_IMAGE: ${{vars.ECR_REGISTRY}}/${{vars.ECR_REPO}}:latest
       - name: Delete artifact
         uses: geekyeggo/delete-artifact@v2
         with:

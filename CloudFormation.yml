@@ -62,7 +62,7 @@ Parameters:
   RepositoryName:
     Type: String
     Description: Name of the docker repository
-    Default: 502154089745.dkr.ecr.us-east-1.amazonaws.com/doce/
+    Default: 008582146967.dkr.ecr.us-east-2.amazonaws.com/doce/
   ApiName:
     Type: String
     Description: Name of the api service
@@ -82,7 +82,7 @@ Parameters:
   CertificateArn:
     Type: String
     Description: Arn of the certificate for https
-    Default: arn:aws:acm:us-east-1:502154089745:certificate/8dd14848-3605-4eb9-a808-944e3e91ed11
+    Default: arn:aws:acm:us-east-2:008582146967:certificate/86bac7ad-7b59-4f08-a0ea-aaae24c86c17
   InstanceImageId:
     Type: String
     Description: EC2 Instance Image ID
@@ -311,14 +311,14 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: "172.31.2.0/24"
-      AvailabilityZone: "us-east-1a"
+      AvailabilityZone: "us-east-2a"
       MapPublicIpOnLaunch: true
       VpcId: !Ref vpc
   subnetZoneB:
     Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: "172.31.3.0/24"
-      AvailabilityZone: "us-east-1b"
+      AvailabilityZone: "us-east-2b"
       MapPublicIpOnLaunch: true
       VpcId: !Ref vpc
   route53RecordSet:
@@ -398,7 +398,7 @@ Resources:
               LogDriver: "awslogs"
               Options:
                 awslogs-group: !Ref apiLogGroup
-                awslogs-region: "us-east-1"
+                awslogs-region: "us-east-2"
             Environment:
               - Name: SPRING_DATASOURCE_URL
                 Value: !Join
@@ -495,7 +495,7 @@ Resources:
             LogDriver: "awslogs"
             Options:
               awslogs-group: !Ref deviceServiceLogGroup
-              awslogs-region: "us-east-1"
+              awslogs-region: "us-east-2"
           Environment:
             - Name: SPRING_DATASOURCE_URL
               Value: !Join
@@ -823,7 +823,7 @@ Resources:
             export PATH=~/.local/bin:$PATH
             source ~/.bash_profile
             pip install --upgrade --user awscli
-            aws configure set default.region us-east-1
+            aws configure set default.region us-east-2
             aws configure set aws_access_key_id ${ecrUserAccessKey}
             aws configure set aws_secret_access_key ${ecrUserAccessKey.SecretAccessKey}
             eval $(aws ecr get-login --no-include-email | sed 's|https://||')
