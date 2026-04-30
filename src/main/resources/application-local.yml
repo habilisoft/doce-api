@@ -32,9 +32,6 @@ cloud:
       auto: false
     region:
       static: us-east-1
-    credentials:
-      accessKey: AKIAXJ2VXKUI5JSYE5FC
-      secretKey: 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
     sqs:
       api-queue: api-doce-local
       device-queue: device-doce-local
