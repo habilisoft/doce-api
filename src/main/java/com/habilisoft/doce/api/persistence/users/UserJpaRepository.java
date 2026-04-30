@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,4 +36,17 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
     void increaseRegisteredCount(@Param("userId") Long id, @Param("value") int i);
 
     List<UserEntity> findAllByPasswordIsNull();
+
+    @Query("SELECT u FROM UserEntity u " +
+            "WHERE lower(trim(u.username)) <> 'superadmin' " +
+            "AND (:term IS NULL OR trim(:term) = '' " +
+            "OR lower(trim(u.username)) LIKE lower(concat('%', trim(:term), '%')) " +
+            "OR lower(trim(u.name)) LIKE lower(concat('%', trim(:term), '%')))")
+    Page<UserEntity> search(@Param("term") String term, Pageable pageable);
+
+    long countByUsernameNotIgnoreCase(String username);
+
+    long countByUsernameNotIgnoreCaseAndLastLoginIsNotNull(String username);
+
+    List<UserEntity> findTop5ByUsernameNotIgnoreCaseAndLastLoginIsNotNullOrderByLastLoginDesc(String username);
 }

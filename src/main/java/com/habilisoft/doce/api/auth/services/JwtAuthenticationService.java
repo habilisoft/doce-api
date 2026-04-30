@@ -5,6 +5,7 @@ import com.habilisoft.doce.api.auth.dto.JwtRequest;
 import com.habilisoft.doce.api.auth.dto.JwtResponse;
 import com.habilisoft.doce.api.auth.exceptions.EmailNotConfirmedException;
 import com.habilisoft.doce.api.auth.exceptions.InvalidCredentialsException;
+import com.habilisoft.doce.api.auth.model.User;
 import com.habilisoft.doce.api.auth.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -40,7 +41,8 @@ public class JwtAuthenticationService {
     public JwtResponse createAuthenticationToken(JwtRequest authenticationRequest) throws Exception {
         authenticate(authenticationRequest);
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+        final User userDetails = (User) userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+        userDetailsService.updateLastLogin(userDetails);
         final String token = jwtTokenUtil.generateToken(userDetails);
 
 
@@ -66,7 +68,8 @@ public class JwtAuthenticationService {
 
     public JwtResponse createAuthenticationToken(String userName) throws Exception {
         authenticate(userName);
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
+        final User userDetails = (User) userDetailsService.loadUserByUsername(userName);
+        userDetailsService.updateLastLogin(userDetails);
         final String token = jwtTokenUtil.generateToken(userDetails);
         return new JwtResponse(token);
     }

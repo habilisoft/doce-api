@@ -59,3 +59,5 @@ databaseChangeLog:
     file: classpath:/migrations/tenant/25-add-device-admin-column.sql
 - include:
     file: classpath:/migrations/tenant/26-add-face-columns-to-device.sql
+- include:
+    file: classpath:/migrations/tenant/27-add-users-search-indexes.sql

@@ -18,4 +18,6 @@ public interface DeviceJpaRepo extends ExtendedRepository<DeviceEntity, Long> {
     @Modifying
     @Query(nativeQuery = true, value = "UPDATE devices SET connected = false WHERE serial_number = :serialNumber")
     void disconnect(@Param("serialNumber") String serialNumber);
+
+    long countByConnectedTrue();
 }

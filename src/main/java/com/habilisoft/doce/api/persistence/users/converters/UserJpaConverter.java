@@ -22,6 +22,8 @@ public class UserJpaConverter {
                         .lastLogin(u.getLastLogin())
                         .password(u.getPassword())
                         .createdDate(u.getCreatedDate())
+                        .active(u.getActive())
+                        .verified(u.getVerified())
                         .build())
                 .orElse(null);
     }
@@ -35,6 +37,8 @@ public class UserJpaConverter {
                         .password(u.getPassword())
                         .profileImageUrl(u.getProfileImageUrl())
                         .lastLogin(u.getLastLogin())
+                        .active(u.getActive())
+                        .verified(u.getVerified())
                         .build())
                 .orElse(null);
     }

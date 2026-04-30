@@ -24,6 +24,7 @@ public class UserResponse {
     private String profileImageUrl;
     private String timeZone;
     private Date lastLogin;
+    private Boolean active;
     private Boolean hasAnswer;
 
     @Override

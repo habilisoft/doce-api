@@ -13,3 +13,5 @@ databaseChangeLog:
     file: classpath:/migrations/public/4-add-employee-data-in-device.sql
 - include:
     file: classpath:/migrations/public/5-add-device-languages.sql
+- include:
+    file: classpath:/migrations/public/6-add-users-search-indexes.sql

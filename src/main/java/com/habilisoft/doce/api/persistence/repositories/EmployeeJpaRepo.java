@@ -47,4 +47,6 @@ public interface EmployeeJpaRepo extends ExtendedRepository<EmployeeEntity, Long
     @Modifying
     @Query(value = "UPDATE employees SET active = true WHERE id = :id", nativeQuery = true)
     void enableEmployee(Long id);
+
+    long countByActiveTrue();
 }
