@@ -33,8 +33,8 @@ cloud:
     region:
       static: us-east-1
     credentials:
-      accessKey: AKIAQD74JFOLZHHVRQT4
-      secretKey: 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
+      accessKey: AKIAXJ2VXKUI5JSYE5FC
+      secretKey: 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
     sqs:
       api-queue: api-doce-local
       device-queue: device-doce-local
